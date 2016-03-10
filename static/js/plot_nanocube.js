@@ -1,23 +1,22 @@
+var nanocube_server_url = 'http://localhost:29512/';
 var quadtree_level = 25;
 var variable_schema = ['count', '0', '1', '2', '0*0', '0*1', '0*2', '1*1', '1*2', '2*2'];
-nc.setup(quadtree_level, variable_schema);
+nc.setup(variable_schema);
 
 d3.json("/static/data.json", function(data) {
-    plot2DScatter(data);
+    //plot2DScatter(data);
 
-    //plotXYHeatmap(data, 50);
+    plotXYHeatmap(data, 50);
 
-    $.getJSON('http://localhost:29512/count.a("test_category",dive([],1))', function(d){
-        d = d.root.children;
-        for(var i = 0; i < d.length; i ++){
-            d[i]['count'] = d[i].val[0];
-        }
+    nc.query(nanocube_server_url+'count.a("test_category",dive([],1))', function(d){
+        console.log(d);
         plotHist(d);
     });
 
 });
 
 function plotHist(data) {
+    data = data.root.children;
     var plotWidth = 400;
     var plotHeight = 300;
 
@@ -26,7 +25,7 @@ function plotHist(data) {
         attr('height', plotHeight);
 
     var xExtent = d3.extent(data, function(row) {
-        return row.count;
+        return row.val.count;
     });
 
     var xScale = d3.scale.linear().domain([0, 16]).range([50, plotWidth - 30]);
@@ -34,14 +33,14 @@ function plotHist(data) {
 
     var barSel = svgSel.selectAll("rect").data(data).enter().append("rect");
     barSel.attr('x', function(d, i){ return xScale((i+1)*2);}).
-          attr('y', function(d){ return yScale(d.count);}).
+          attr('y', function(d){ return yScale(d.val.count);}).
           attr('width', 30).
-          attr('height', function(d){ return plotHeight-30-yScale(d.count); }).
+          attr('height', function(d){ return plotHeight-30-yScale(d.val.count); }).
           attr('fill', 'steelblue').
           attr('stroke', 'black');
 
     barSel.on("mouseenter", function(d){
-        nc.query_categorty(d.path, plotPCA);
+        query_categorty(d.path, plotPCA);
     });
 
     var xAxis = d3.svg.axis().scale(xScale).ticks(0);
@@ -156,10 +155,10 @@ function plotHeatmap(data, svgSel, plotWidth, plotHeight){
 
 // Assume X binSize == Y binSize
 function plotXYHeatmap(data, binSize) {
-    var xExtent = d3.extent(data, function(row) {
+    xExtent = d3.extent(data, function(row) {
         return row[0];
     });
-    var yExtent = d3.extent(data, function(row) {
+    yExtent = d3.extent(data, function(row) {
         return row[1];
     });
 
@@ -223,12 +222,13 @@ function plotXYHeatmap(data, binSize) {
 
 function brushmove() {
     var extent = d3.event.target.extent();
-    nc.query_quadtree(extent, xExtent, yExtent, plotPCA);
+    query_quadtree(extent, xExtent, yExtent, plotPCA);
 }
 
 function brushend() {
     if (d3.event.target.empty()) {
-        nc.query_all(plotPCA);
+        var q = nanocube_server_url+'count';
+        nc.query(q, plotPCA);
     }
 }
 
@@ -262,3 +262,23 @@ if (!String.prototype.format) {
     });
   };
 }
+
+
+function query_quadtree(extent, xExtent, yExtent, handleFunc) {
+    var n = Math.pow(2, quadtree_level);
+    var xRange = xExtent[1]-xExtent[0];
+    var yRange = yExtent[1]-yExtent[0];
+    var lowXTile = Math.min(n,Math.floor((Math.max(0,extent[0][0]-xExtent[0])/xRange)*n));
+    var lowYTile = Math.min(n,Math.floor((Math.max(0,extent[0][1]-xExtent[0])/xRange)*n));
+    var upXTile = Math.min(n,Math.floor((Math.max(0,extent[1][0]-yExtent[0])/yRange)*n));
+    var upYTile = Math.min(n,Math.floor((Math.max(0,extent[1][1]-yExtent[0])/yRange)*n));
+
+    var query = nanocube_server_url+'/count.r("location",range2d(tile2d({0},{1},{4}),tile2d({2},{3},{4})))'.format(lowXTile,lowYTile,upXTile,upYTile,quadtree_level);
+
+    nc.query(query, handleFunc);
+}
+
+function query_categorty(c_id, handleFunc) {
+    var query = nanocube_server_url+'/count.r("test_category",set(['+c_id+']))'
+    nc.query(query, handleFunc);
+};

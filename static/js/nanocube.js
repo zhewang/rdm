@@ -6,10 +6,8 @@ var nc = {};
 
 nc._variable_schema = {};
 nc._num_feature_dimensionm = null;
-nc._quadtree_level = 25;
 
-nc.setup = function (level, s) {
-    nc._quadtree_level = level;
+nc.setup = function (s) {
 
     for(var i = 0; i < s.length; i ++) {
         nc._variable_schema[String(s[i])] = i;
@@ -19,37 +17,19 @@ nc.setup = function (level, s) {
     nc._num_feature_dimensionm = Math.floor((Math.sqrt(8*(s.length)+1)-3) / 2);
 };
 
-nc.query_all = function (handleFunc) {
-    $.getJSON('http://localhost:29512/count', function(data) {
-        handleFunc(nc._pca(data.root.val));
-    });
-};
-
-nc.query_categorty = function (c_id, handleFunc) {
-    var query = 'http://localhost:29512/count.r("test_category",set(['+c_id+']))'
-    $.getJSON(query, function(data) {
-        handleFunc(nc._pca(data.root.val));
-    });
-};
-
-nc.query_quadtree = function (extent, xExtent, yExtent, handleFunc) {
-    var n = Math.pow(2, nc._quadtree_level);
-    var xRange = xExtent[1]-xExtent[0];
-    var yRange = yExtent[1]-yExtent[0];
-    var lowXTile = Math.min(n,Math.floor((Math.max(0,extent[0][0]-xExtent[0])/xRange)*n));
-    var lowYTile = Math.min(n,Math.floor((Math.max(0,extent[0][1]-xExtent[0])/xRange)*n));
-    var upXTile = Math.min(n,Math.floor((Math.max(0,extent[1][0]-yExtent[0])/yRange)*n));
-    var upYTile = Math.min(n,Math.floor((Math.max(0,extent[1][1]-yExtent[0])/yRange)*n));
-
-    var query = 'http://localhost:29512/count.r("location",range2d(tile2d({0},{1},{4}),tile2d({2},{3},{4})))'.format(lowXTile,lowYTile,upXTile,upYTile,nc._quadtree_level);
-
-    $.getJSON(query, function(data) {
-        var vec = data.root.val;
-        if(typeof vec === 'undefined') {
-            return;
-        } else {
-            handleFunc(nc._pca(vec));
+nc.query = function (q, f) {
+    $.getJSON(q, function(data) {
+        //f(nc._pca(data.root.val));
+        if('val' in data.root) {
+            data.root.val = nc._pca(data.root.val);
+            f(data);
+        } else if('children' in data.root) {
+            for(var i = 0; i < data.root.children.length; i ++) {
+                data.root.children[i].val = nc._pca(data.root.children[i].val);
+            }
+            f(data);
         }
+
     });
 };
 
@@ -57,9 +37,8 @@ nc._pca = function (vec) {
     var d = nc._num_feature_dimensionm;
     var s = nc._variable_schema;
 
-    if(vec[s.count] < d) {
-        console.log('Too few selections.');
-        return;
+    if(typeof vec === 'undefined' || vec[s.count] < d) {
+        return null;
     }
 
     // if count < dimensions, PCA won't work
@@ -103,6 +82,7 @@ nc._pca = function (vec) {
 
     var results = {'cov_matrix': covMat,
                    'eig_value': eig_value,
-                   'eig_vector': eig_vector};
+                   'eig_vector': eig_vector,
+                   'count': vec[s.count]};
     return results;
 };
