@@ -33,7 +33,7 @@ for n in range(ROWS):
     r = [n%4+0.5, n%4+0.5, 1]
     if args.f is False:
         r = [random.uniform(0.00001,10) for i in range(DIMS-1)]
-        r.append(5)
+        r.append(5*math.sqrt(2)-abs(r[0]-r[1])/math.sqrt(2))
     xMin = min(xMin, r[0])
     xMax = max(xMax, r[0])
     yMin = min(yMin, r[1])
@@ -98,7 +98,6 @@ field: time nc_dim_time_2\n"""
     for i in range(len(data_nc)):
         xTile = int(n*((data_key[i][0]*1.0-xMin)/xRange))
         yTile = int(n*((data_key[i][1]*1.0-yMin)/yRange))
-        print(xTile, yTile)
         v = struct.pack(pack_str,xTile,yTile,GetGaussInt(0,4),0,*data_nc[i])
         f.write(v)
 

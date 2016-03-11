@@ -37,7 +37,7 @@ nc._pca = function (vec) {
     var d = nc._num_feature_dimensionm;
     var s = nc._variable_schema;
 
-    if(typeof vec === 'undefined' || vec[s.count] < d) {
+    if(typeof vec === 'undefined') {
         return null;
     }
 
@@ -46,6 +46,7 @@ nc._pca = function (vec) {
     for(var i = 0; i < d; i ++) {
         covMat[i] = new Array(d);
     }
+
 
     // build the upper triangular area
     for(var row = 0; row < d; row ++) {
@@ -62,6 +63,10 @@ nc._pca = function (vec) {
         for(var col = 0; col < row; col ++) {
             covMat[row][col] = covMat[col][row];
         }
+    }
+
+    if(vec[s.count] < d) {
+        return {'cov_matrix': covMat, 'eig_value':null, 'eig_vector':null};
     }
 
     // calculate eigen value and eigen vector
