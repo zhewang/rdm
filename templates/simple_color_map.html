@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8"/>
+        <script src="{{ url_for('static', filename='js/d3.v3.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/jquery.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/numeric-1.2.6.min.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/nanocube.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/plot_simplecolormap.js') }}"></script>
+        <style>
+        body {
+            font: 8px sans-serif;
+        }
+        path.domain {
+            fill: none;
+            stroke-width: 2px;
+            stroke: black;
+        }
+        .tick > line {
+            fill: none;
+            stroke: black;
+        }
+        .tick > text {
+            fill: black;
+        }
+        .brush .extent {
+            fill-opacity: .1;
+            stroke: #fff;
+            shape-rendering: crispEdges;
+        }
+        .left{
+            float:left; 
+            margin-left: 50px;
+        }
+        </style>
+    </head>
+    <body>
+        <div class="left" id="heatmap"></div>
+    </body>
+</html>
