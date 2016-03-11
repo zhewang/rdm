@@ -49,13 +49,15 @@ function plot(data, binSize) {
         .append("rect")
         .call(setBin);
 
+        function getColor (d) {
+            var r = Math.floor(d.val.cov_matrix[0][0]*10);
+            var g = Math.floor(d.val.cov_matrix[1][1]*10);
+            var b = Math.floor(d.val.cov_matrix[2][2]*10);
+            return 'rgb({0},{1},{2})'.format(r,g,b);
+        };
+
         function setBin(sel) {
-            sel.attr("fill", function(d) {
-                var r = Math.floor(d.val.cov_matrix[0][0]*10);
-                var g = Math.floor(d.val.cov_matrix[1][1]*10);
-                var b = Math.floor(d.val.cov_matrix[2][2]*10);
-                return 'rgb({0},{1},{2})'.format(r,g,b);
-            })
+            sel.attr("fill", function(d){return getColor(d)})
             .attr("stroke", "black")
             .attr("stroke-width", 2)
             .attr("x", function(d) {
@@ -67,7 +69,15 @@ function plot(data, binSize) {
             .attr("width", gridXSize)
             .attr("height", gridYSize)
             .on("click", function(d) {
-                console.log(d);
+                if(d3.select(this).classed('selected') == false) {
+                    sel.attr('opacity', '0.5');
+                    d3.select(this)
+                    .attr('opacity', '1.0');
+                    d3.select(this).classed('selected', true);
+                } else {
+                    d3.select(this).classed('selected', false);
+                    sel.attr('opacity', '1.0');
+                }
             });
         }
 
