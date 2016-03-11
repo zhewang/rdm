@@ -91,10 +91,14 @@ field: time nc_dim_time_2\n"""
     f.write(header+'\n')
 
     pack_str = '<iiBH' + 'd'*count
+
+    n = 2**25
+    xRange = xMax-xMin
+    yRange = yMax-yMin
     for i in range(len(data_nc)):
-        # 1<<25 is 2**25
-        xTile = min(1<<25,int(((data_key[i][0]-xMin)/(xMax-xMin))*(1<<25)))
-        yTile = min(1<<25,int(((data_key[i][1]-yMin)/(yMax-yMin))*(1<<25)))
+        xTile = int(n*((data_key[i][0]*1.0-xMin)/xRange))
+        yTile = int(n*((data_key[i][1]*1.0-yMin)/yRange))
+        print(xTile, yTile)
         v = struct.pack(pack_str,xTile,yTile,GetGaussInt(0,4),0,*data_nc[i])
         f.write(v)
 
