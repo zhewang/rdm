@@ -3,22 +3,11 @@ var quadtree_level = 25;
 var variable_schema = ['count', '0', '1', '2', '0*0', '0*1', '0*2', '1*1', '1*2', '2*2'];
 nc.setup(variable_schema);
 
-var diveLevel = 3;
+var diveLevel = 5;
 
-d3.json("/static/data.json", function(data) {
-    plot(data);
-});
-
-// Assume X binSize == Y binSize
-function plot(data, binSize) {
-    var xExtent = d3.extent(data, function(row) {
-        return row[0];
-    });
-    var yExtent = d3.extent(data, function(row) {
-        return row[1];
-    });
-    xExtent = [0,10];
-    yExtent = [0,10];
+function plot() {
+    var xExtent = [0,10];
+    var yExtent = [0,10];
 
     var plotWidth = 500;
     var plotHeight = 500;
@@ -59,7 +48,7 @@ function plot(data, binSize) {
         function setBin(sel) {
             sel.attr("fill", function(d){return getColor(d)})
             .attr("stroke", "black")
-            .attr("stroke-width", 2)
+            .attr("stroke-width", 1)
             .attr("x", function(d) {
                 return d.x*gridXSize;
             })
