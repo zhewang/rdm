@@ -41,12 +41,10 @@ nc._pca = function (vec) {
         return null;
     }
 
-    // if count < dimensions, PCA won't work
     var covMat = new Array(d);
     for(var i = 0; i < d; i ++) {
         covMat[i] = new Array(d);
     }
-
 
     // build the upper triangular area
     for(var row = 0; row < d; row ++) {
@@ -65,8 +63,12 @@ nc._pca = function (vec) {
         }
     }
 
+    // if count < dimensions, PCA won't work
     if(vec[s.count] < d) {
-        return {'cov_matrix': covMat, 'eig_value':null, 'eig_vector':null};
+        return {'cov_matrix': covMat,
+                'eig_value': null,
+                'eig_vector':null,
+                'count': vec[s.count]};
     }
 
     // calculate eigen value and eigen vector

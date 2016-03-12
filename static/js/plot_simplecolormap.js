@@ -6,7 +6,11 @@ nc.setup(variable_schema);
 
 $(document).ready(function(){
     var sel = d3.select('#levelChange');
-    sel.selectAll('option').data([0,1,2,3,4,5,6,7,8]).enter()
+    var levels = [];
+    for(var i = 0; i < 10; i ++) {
+        levels.push(i);
+    }
+    sel.selectAll('option').data(levels).enter()
     .append('option')
     .attr('value', function(d){ return d;})
     .text(function(d){ return d;});
