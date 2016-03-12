@@ -15,10 +15,11 @@ $(document).ready(function(){
         plot(this.value);
     });
 
-    plot();
+    document.getElementById('levelChange').value=5;
+    plot(5);
 });
 
-function plot(diveLevel=5) {
+function plot(diveLevel) {
     var xExtent = [0,10];
     var yExtent = [0,10];
 
