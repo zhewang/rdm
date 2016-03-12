@@ -3,16 +3,16 @@ var quadtree_level = 25;
 var variable_schema = ['count', '0', '1', '2', '0*0', '0*1', '0*2', '1*1', '1*2', '2*2'];
 nc.setup(variable_schema);
 
-var diveLevel = 5;
+var diveLevel = 6;
 
 function plot() {
     var xExtent = [0,10];
     var yExtent = [0,10];
 
-    var plotWidth = 500;
-    var plotHeight = 500;
+    var plotWidth = 600;
+    var plotHeight = 600;
 
-    var margin = { top: 10, right: 10, bottom: 30, left: 30 };
+    var margin = { top: 30, right: 30, bottom: 30, left: 30 };
 
     var svgSel = d3.select("#heatmap")
         .append("svg")
@@ -24,15 +24,18 @@ function plot() {
     var contentWidth = plotWidth-margin.left-margin.right;
     var contentHeight = plotHeight-margin.top-margin.bottom;
 
+    var gridXSize = Math.floor(contentWidth/Math.pow(2,diveLevel));
+    var gridYSize = Math.floor(contentHeight/Math.pow(2,diveLevel));
+
+    contentWidth = gridXSize*Math.pow(2,diveLevel);
+    contentHeight = gridYSize*Math.pow(2,diveLevel);
+
     var xScale = d3.scale.linear().domain(xExtent).range([0, contentWidth]);
     var yScale = d3.scale.linear().domain(yExtent).range([contentHeight, 0]);
 
     var q = nanocube_server_url+'/count.a("location",dive(tile2d(0,0,0),'+diveLevel+'),"img")'
     nc.query(q, function(d){
         var data = d.root.children;
-
-        var gridXSize = (plotWidth-margin.left-margin.right)/Math.pow(2,diveLevel);
-        var gridYSize = (plotHeight-margin.top-margin.bottom)/Math.pow(2,diveLevel);
 
         var binSel = svgSel.selectAll("rect").data(data).enter()
         .append("rect")
@@ -47,13 +50,11 @@ function plot() {
 
         function setBin(sel) {
             sel.attr("fill", function(d){return getColor(d)})
-            .attr("stroke", "black")
-            .attr("stroke-width", 1)
             .attr("x", function(d) {
                 return d.x*gridXSize;
             })
             .attr("y", function(d) {
-                return plotHeight-margin.top-margin.bottom-(d.y+1)*gridYSize;
+                return contentHeight-(d.y+1)*gridYSize;
             })
             .attr("width", gridXSize)
             .attr("height", gridYSize)
