@@ -40,27 +40,32 @@ function plot(diveLevel) {
 
     var margin = { top: 30, right: 30, bottom: 30, left: 30 };
 
-    d3.select("#heatmap").selectAll("svg").remove();
-    d3.select("#heatmap").selectAll("rect").remove();
-    var svgSel = d3.select("#heatmap")
-        .append("svg")
-        .attr("width", 500)
-        .attr("height", 500)
-        .attr('viewBox', '0 0 '+plotWidth+' '+plotHeight)
-        .attr('id', 'plot')
-        .append("g")
-        .attr("transform", "translate(" + margin.left + "," + margin.top+ ")");
-
     var contentWidth = plotWidth-margin.left-margin.right;
     var contentHeight = plotHeight-margin.top-margin.bottom;
 
-    var gridXSize = Math.floor(contentWidth/Math.pow(2,diveLevel)+0.5);
-    var gridYSize = Math.floor(contentHeight/Math.pow(2,diveLevel)+0.5);
+    var gridXSize = Math.max(1,Math.floor(contentWidth/Math.pow(2,diveLevel)+0.5));
+    var gridYSize = Math.max(Math.floor(contentHeight/Math.pow(2,diveLevel)+0.5));
 
     // Update the width and height because grid size id converted to integer, so
     // gridSize*number_of_bins is changed
     contentWidth = gridXSize*Math.pow(2,diveLevel);
     contentHeight = gridYSize*Math.pow(2,diveLevel);
+
+    plotWidth = contentWidth+margin.left+margin.right;
+    plotHeight = contentHeight+margin.top+margin.bottom;
+
+    d3.select("#heatmap").selectAll("svg").remove();
+    d3.select("#heatmap").selectAll("rect").remove();
+
+    // plot heatmap
+    var svgSel = d3.select("#heatmap")
+        .append("svg")
+        .attr("width", plotWidth)
+        .attr("height", plotHeight)
+        .attr('viewBox', '0 0 '+plotWidth+' '+plotHeight)
+        .attr('id', 'plot')
+        .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top+ ")");
 
     var xScale = d3.scale.linear().domain(xExtent).range([0, contentWidth]);
     var yScale = d3.scale.linear().domain(yExtent).range([contentHeight, 0]);
