@@ -44,8 +44,8 @@ function plot(diveLevel) {
     d3.select("#heatmap").selectAll("rect").remove();
     var svgSel = d3.select("#heatmap")
         .append("svg")
-        .attr("width", 1000)
-        .attr("height", 1000)
+        .attr("width", 500)
+        .attr("height", 500)
         .attr('viewBox', '0 0 '+plotWidth+' '+plotHeight)
         .attr('id', 'plot')
         .append("g")
@@ -54,8 +54,8 @@ function plot(diveLevel) {
     var contentWidth = plotWidth-margin.left-margin.right;
     var contentHeight = plotHeight-margin.top-margin.bottom;
 
-    var gridXSize = Math.floor(contentWidth/Math.pow(2,diveLevel));
-    var gridYSize = Math.floor(contentHeight/Math.pow(2,diveLevel));
+    var gridXSize = Math.floor(contentWidth/Math.pow(2,diveLevel)+0.5);
+    var gridYSize = Math.floor(contentHeight/Math.pow(2,diveLevel)+0.5);
 
     // Update the width and height because grid size id converted to integer, so
     // gridSize*number_of_bins is changed
