@@ -9,7 +9,7 @@
         <script src="{{ url_for('static', filename='js/plot_simplecolormap.js') }}"></script>
         <style>
         body {
-            font: 8px sans-serif;
+            font: 10px sans-serif;
         }
         .brush .extent {
             fill-opacity: .1;
@@ -23,10 +23,10 @@
         </style>
     </head>
     <body>
+        <div class="left" id="heatmap"></div>
         <div class="left">
             <p>Dive Level:</p>
             <select id="levelChange"></select>
         </div>
-        <div class="left" id="heatmap"></div>
     </body>
 </html>

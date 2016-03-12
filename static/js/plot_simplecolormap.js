@@ -76,7 +76,8 @@ function plot(diveLevel) {
 
     var svg = d3.select("#heatmap").select('svg');
     svg.append("g")
-    .attr("transform", "translate("+margin.left+", "+(contentHeight+margin.top).toString()+")")
+    .attr("transform", "translate("+margin.left+", "+
+          (contentHeight+margin.top).toString()+")")
     .call(xAxis);
 
     yAxis.orient("left");
@@ -102,7 +103,10 @@ function plot(diveLevel) {
     svg.call(setAxisStyle);
 
     // Draw the heatmap
-    var q = nanocube_server_url+'/count.a("location",dive(tile2d(0,0,0),'+diveLevel+'),"img")'
+    var q = nanocube_server_url+
+            '/count.a("location",dive(tile2d(0,0,0),'+
+            diveLevel+'),"img")';
+
     nc.query(q, function(d){
         var data = d.root.children;
 
@@ -110,6 +114,10 @@ function plot(diveLevel) {
         .append("rect")
         .call(setBin);
 
+        //svg2img('plot');
+    });
+
+    function setBin(sel) {
         function getColor (d) {
             var r = Math.floor(d.val.cov_matrix[0][0]*10);
             var g = Math.floor(d.val.cov_matrix[1][1]*10);
@@ -117,33 +125,28 @@ function plot(diveLevel) {
             return 'rgb({0},{1},{2})'.format(r,g,b);
         };
 
-        function setBin(sel) {
-            sel.attr("fill", function(d){return getColor(d)})
-            .attr("x", function(d) {
-                return d.x*gridXSize;
-            })
-            .attr("y", function(d) {
-                return contentHeight-(d.y+1)*gridYSize;
-            })
-            .attr("width", gridXSize)
-            .attr("height", gridYSize)
-            .on("click", function(d) {
-                if(d3.select(this).classed('selected') == false) {
-                    sel.attr('opacity', '0.5');
-                    d3.select(this)
-                    .attr('opacity', '1.0');
-                    d3.select(this).classed('selected', true);
-                } else {
-                    d3.select(this).classed('selected', false);
-                    sel.attr('opacity', '1.0');
-                }
-                console.log(d);
-            });
-        }
-
-        //svg2img('plot');
-
-    });
+        sel.attr("fill", function(d){return getColor(d)})
+        .attr("x", function(d) {
+            return d.x*gridXSize;
+        })
+        .attr("y", function(d) {
+            return contentHeight-(d.y+1)*gridYSize;
+        })
+        .attr("width", gridXSize)
+        .attr("height", gridYSize)
+        .on("click", function(d) {
+            if(d3.select(this).classed('selected') == false) {
+                sel.attr('opacity', '0.5');
+                d3.select(this)
+                .attr('opacity', '1.0');
+                d3.select(this).classed('selected', true);
+            } else {
+                d3.select(this).classed('selected', false);
+                sel.attr('opacity', '1.0');
+            }
+            console.log(d);
+        });
+    }
 }
 
 if (!String.prototype.format) {
