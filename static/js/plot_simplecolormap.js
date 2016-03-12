@@ -17,14 +17,26 @@ $(document).ready(function(){
 
     document.getElementById('levelChange').value=5;
     plot(5);
+
 });
+
+
+function svg2img(svgID){
+    var svg  = document.getElementById(svgID);
+    var xml  = new XMLSerializer().serializeToString(svg);
+    var data = "data:image/svg+xml;base64," + btoa(xml);
+    var img  = new Image();
+
+    img.setAttribute('src', data);
+    document.body.appendChild(img);
+}
 
 function plot(diveLevel) {
     var xExtent = [0,10];
     var yExtent = [0,10];
 
-    var plotWidth = 600;
-    var plotHeight = 600;
+    var plotWidth = 500;
+    var plotHeight = 500;
 
     var margin = { top: 30, right: 30, bottom: 30, left: 30 };
 
@@ -32,8 +44,10 @@ function plot(diveLevel) {
     d3.select("#heatmap").selectAll("rect").remove();
     var svgSel = d3.select("#heatmap")
         .append("svg")
-        .attr("width", plotWidth)
-        .attr("height", plotHeight)
+        .attr("width", 1000)
+        .attr("height", 1000)
+        .attr('viewBox', '0 0 '+plotWidth+' '+plotHeight)
+        .attr('id', 'plot')
         .append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top+ ")");
 
@@ -64,6 +78,23 @@ function plot(diveLevel) {
     svg.append("g")
     .attr("transform", "translate("+margin.left+", "+margin.top+")")
     .call(yAxis);
+
+    var setAxisStyle = function (sel) {
+        sel.selectAll('.domain')
+        .attr('stroke-width', 2)
+        .attr('stroke', 'black')
+        .attr('fill', 'none');
+
+        sel.selectAll('.tick').selectAll('line')
+        .attr('stroke', 'black')
+        .attr('fill', 'none');
+
+        sel.selectAll('.tick').selectAll('text')
+        .attr('font-family', 'sans-serif')
+        .attr('font-size', 10);
+    };
+
+    svg.call(setAxisStyle);
 
     // Draw the heatmap
     var q = nanocube_server_url+'/count.a("location",dive(tile2d(0,0,0),'+diveLevel+'),"img")'
@@ -104,6 +135,8 @@ function plot(diveLevel) {
                 console.log(d);
             });
         }
+
+        //svg2img('plot');
 
     });
 }
