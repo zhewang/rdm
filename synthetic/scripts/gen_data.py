@@ -6,6 +6,8 @@ import random
 import numpy as np
 import itertools
 import math
+import sys
+
 
 
 def GetGaussInt(a, b):
@@ -14,92 +16,98 @@ def GetGaussInt(a, b):
         value = random.gauss((a+b)/2, (b-a)/2)
     return int(value)
 
-parser = argparse.ArgumentParser(description='Generate testing data')
-parser.add_argument('-f', action='store_true', default=False)
-parser.add_argument('dimensions', type=int, help='dimension of features')
-parser.add_argument('rows', type=int, help='number of rows')
-parser.add_argument('level', type=int, help='quadtree level')
-args = parser.parse_args()
-DIMS = args.dimensions
-ROWS = args.rows
-LEVEL = args.level
+def header():
+    header = "name: test_file\n"+ \
+             "encoding: binary\n"+ \
+             "metadata: location__origin degrees_mercator_quadtree{0}\n"+ \
+             "field: location nc_dim_quadtree_{0}\n"+ \
+             "field: test_category nc_dim_cat_1\n"+ \
+             "valname: test_category 0 CATEGORY_A\n"+ \
+             "valname: test_category 1 CATEGORY_B\n"+ \
+             "valname: test_category 2 CATEGORY_C\n"+ \
+             "valname: test_category 3 CATEGORY_D\n"+ \
+             "valname: test_category 4 CATEGORY_E\n"+ \
+             "metadata: tbin 2016-01-01_00:00:00_3600s\n"+ \
+             "field: time nc_dim_time_2\n"
+    header = header.format(LEVEL)
 
-# Generate data
-data_key = []
-data_var = []
-xMin = 9999999999999
-xMax = -9999999999999
-yMin = 9999999999999
-yMax = -9999999999999
-for n in range(ROWS):
-    r = [n%4+0.5, n%4+0.5, 1]
-    if args.f is False:
-        r = [random.uniform(0.00001,10) for i in range(DIMS-1)]
-        r.append(5*math.sqrt(2)-abs(r[0]-r[1])/math.sqrt(2))
-    xMin = min(xMin, r[0])
-    xMax = max(xMax, r[0])
-    yMin = min(yMin, r[1])
-    yMax = max(yMax, r[1])
-    mean = [0 for i in range(DIMS)]
-    cov = np.diag(r)
-    v = np.random.multivariate_normal(mean, cov).tolist()
-    data_key.append(r)
-    data_var.append(v)
-
-with open('data.json', 'w') as f:
-    f.write(json.dumps(data_key))
-
-# Preprocess data for NanoCube
-data_nc = []
-data_schema = []
-flag = True
-for row in data_var:
-    r = [1]+row
-    if flag is True:
-        data_schema.append('count')
-        for i in range(len(row)):
-            data_schema.append(str(i))
-    comb = itertools.combinations_with_replacement(range(DIMS), 2)
-    for c in comb:
-        r.append(row[int(c[0])]*row[int(c[1])])
-        if flag is True:
-            data_schema.append(str(c[0])+'*'+str(c[1]))
-
-    r = [round(i, 6) for i in r]
-    data_nc.append(r)
-    if flag is True:
-        print('Variable Schema: {}'.format(data_schema))
-        flag = False
-
-
-with open('data_nc.dmp', 'w') as f:
-    header = """name: test_file
-encoding: binary
-metadata: location__origin degrees_mercator_quadtree25
-field: location nc_dim_quadtree_{}
-field: test_category nc_dim_cat_1
-valname: test_category 0 CATEGORY_A
-valname: test_category 1 CATEGORY_B
-valname: test_category 2 CATEGORY_C
-valname: test_category 3 CATEGORY_D
-valname: test_category 4 CATEGORY_E
-metadata: tbin 2016-01-01_00:00:00_3600s
-field: time nc_dim_time_2\n""".format(LEVEL)
-
-    count = DIMS*(DIMS+1)/2 + DIMS + 1 # This includes the count dimension, not includes time dimension
-    print("NanoCube variable dimensions: "+str(count))
+    # This includes the count dimension, not includes time dimension
     for i in range(count):
         header = header + 'field: dim' + str(i) + ' nc_var_float_8' + '\n'
-    f.write(header+'\n')
+    sys.stdout.write(header+'\n')
 
-    pack_str = '<iiBH' + 'd'*count
+def body():
+    global flag
+    data_schema = []
+    # Sample keys
+    for n in range(ROWS):
+        key = [n%4+0.5, n%4+0.5, 1]
+        if args.f is False:
+            key = [random.uniform(0.00001,10) for i in range(DIMS-1)]
+            key.append(5*math.sqrt(2)-abs(key[0]-key[1])/math.sqrt(2))
+        mean = [0 for i in range(DIMS)]
+        cov = np.diag(key)
+        v = np.random.multivariate_normal(mean, cov).tolist()
 
-    n = 2**LEVEL
-    xRange = xMax-xMin
-    yRange = yMax-yMin
-    for i in range(len(data_nc)):
-        xTile = int(n*((data_key[i][0]*1.0-xMin)/xRange))
-        yTile = int(n*((data_key[i][1]*1.0-yMin)/yRange))
-        v = struct.pack(pack_str,xTile,yTile,GetGaussInt(0,4),0,*data_nc[i])
-        f.write(v)
+        # Calculate all comination for variables
+        var = [1]+v
+        if flag is True:
+            data_schema.append('count')
+            for i in range(len(v)):
+                data_schema.append(str(i))
+
+        comb = itertools.combinations_with_replacement(range(DIMS), 2)
+        for c in comb:
+            var.append(v[int(c[0])]*v[int(c[1])])
+            if flag is True:
+                data_schema.append(str(c[0])+'*'+str(c[1]))
+
+        var = [round(i, 6) for i in var]
+
+        if flag is True:
+            print("NanoCube variable dimensions: "+str(count))
+            print('Variable Schema: {}'.format(data_schema))
+            flag = False
+            if args.s is True:
+                sys.exit(0)
+
+        # Dump
+        pack_str = '<iiBH' + 'd'*count
+
+        resolution = 2**LEVEL
+        xRange = xMax-xMin
+        yRange = yMax-yMin
+
+        xTile = int(resolution*((key[0]*1.0-xMin)/xRange))
+        yTile = int(resolution*((key[1]*1.0-yMin)/yRange))
+        binStr = struct.pack(pack_str,xTile,yTile,GetGaussInt(0,4),0,*var)
+        sys.stdout.write(binStr)
+
+
+if __name__ == '__main__':
+
+    parser = argparse.ArgumentParser(description='Generate testing data')
+    parser.add_argument('-f', action='store_true', default=False, help='fixed position')
+    parser.add_argument('-s', action='store_true', default=False, help='only show schema of dmp file')
+    parser.add_argument('-d', type=int, default=3, help='dimension of features')
+    parser.add_argument('-r', type=int, default=1, help='number of rows')
+    parser.add_argument('-l', type=int, default=20, help='quadtree level')
+    args = parser.parse_args()
+    DIMS = args.d
+    ROWS = args.r
+    LEVEL = args.l
+
+    xMin = 0
+    xMax = 10
+    yMin = 0
+    yMax = 10
+
+    flag = args.s
+
+    count = DIMS*(DIMS+1)/2 + DIMS + 1
+
+    if flag is False:
+        header()
+
+    body()
 
