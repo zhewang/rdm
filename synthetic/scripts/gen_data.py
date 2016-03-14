@@ -18,9 +18,11 @@ parser = argparse.ArgumentParser(description='Generate testing data')
 parser.add_argument('-f', action='store_true', default=False)
 parser.add_argument('dimensions', type=int, help='dimension of features')
 parser.add_argument('rows', type=int, help='number of rows')
+parser.add_argument('level', type=int, help='quadtree level')
 args = parser.parse_args()
 DIMS = args.dimensions
 ROWS = args.rows
+LEVEL = args.level
 
 # Generate data
 data_key = []
@@ -74,7 +76,7 @@ with open('data_nc.dmp', 'w') as f:
     header = """name: test_file
 encoding: binary
 metadata: location__origin degrees_mercator_quadtree25
-field: location nc_dim_quadtree_25
+field: location nc_dim_quadtree_{}
 field: test_category nc_dim_cat_1
 valname: test_category 0 CATEGORY_A
 valname: test_category 1 CATEGORY_B
@@ -82,7 +84,7 @@ valname: test_category 2 CATEGORY_C
 valname: test_category 3 CATEGORY_D
 valname: test_category 4 CATEGORY_E
 metadata: tbin 2016-01-01_00:00:00_3600s
-field: time nc_dim_time_2\n"""
+field: time nc_dim_time_2\n""".format(LEVEL)
 
     count = DIMS*(DIMS+1)/2 + DIMS + 1 # This includes the count dimension, not includes time dimension
     print("NanoCube variable dimensions: "+str(count))
@@ -92,7 +94,7 @@ field: time nc_dim_time_2\n"""
 
     pack_str = '<iiBH' + 'd'*count
 
-    n = 2**25
+    n = 2**LEVEL
     xRange = xMax-xMin
     yRange = yMax-yMin
     for i in range(len(data_nc)):
