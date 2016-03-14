@@ -1,1 +1,97 @@
 # Generate .dmp file from .csv
+import argparse
+import csv
+import itertools
+import struct
+import sys
+
+def header():
+    header = "name: sdss_dr7_stars\n"+ \
+             "encoding: binary\n"+ \
+             "field: location nc_dim_quadtree_{0}\n"+ \
+             "metadata: tbin 2016-01-01_00:00:00_3600s\n"+ \
+             "field: time nc_dim_time_2\n"
+    header = header.format(LEVEL)
+
+    # This includes the count dimension, not includes time dimension
+    for i in range(count):
+        header = header + 'field: dim' + str(i) + ' nc_var_float_8' + '\n'
+    sys.stdout.write(header+'\n')
+
+def body(filepath):
+    global flag
+    data_schema = []
+    with open(filepath, 'r') as csvfile:
+        reader = csv.reader(csvfile, delimiter=',')
+        for row in reader:
+            key = [float(row[6]), float(row[7])]
+            v = [1]
+            v.append(float(row[6])-float(row[11]))
+            v.append(float(row[7])-float(row[12]))
+            v.append(float(row[8])-float(row[13]))
+            v.append(float(row[9])-float(row[14]))
+            v.append(float(row[10])-float(row[15]))
+            v.append(float(row[16]))
+            v.append(float(row[17]))
+            v.append(float(row[18]))
+            v.append(float(row[19]))
+            v.append(float(row[20]))
+
+            var = v
+            if flag is True:
+                data_schema.append('count')
+                for i in range(len(v)):
+                    data_schema.append(str(i))
+
+            comb = itertools.combinations_with_replacement(range(DIMS), 2)
+            for c in comb:
+                var.append(v[int(c[0])]*v[int(c[1])])
+                if flag is True:
+                    data_schema.append(str(c[0])+'*'+str(c[1]))
+
+            if flag is True:
+                print("NanoCube variable dimensions: "+str(count))
+                print("NanoCube quadtree level: "+str(LEVEL))
+                print('Variable Schema: {}'.format(data_schema))
+                flag = False
+                if args.s is True:
+                    sys.exit(0)
+
+            # Dump
+            pack_str = '<iiH' + 'd'*count
+
+            resolution = 2**LEVEL
+            xMin = uExtent[0]
+            yMin = gExtent[0]
+            xRange = uExtent[1]-uExtent[0]
+            yRange = gExtent[1]-gExtent[0]
+
+            xTile = int(resolution*((key[0]*1.0-xMin)/xRange))
+            yTile = int(resolution*((key[1]*1.0-yMin)/yRange))
+            binStr = struct.pack(pack_str,xTile,yTile,0,*var)
+            sys.stdout.write(binStr)
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Generate testing data')
+    parser.add_argument('filepath', help='file path')
+    parser.add_argument('-l', type=int, default=15, help='quadtree level')
+    parser.add_argument('-s', action='store_true', default=False, help='only show schema of dmp file')
+    args = parser.parse_args()
+
+    LEVEL = args.l
+    flag = args.s
+
+    DIMS = 10
+    count = DIMS*(DIMS+1)/2 + DIMS + 1
+
+    uExtent = [12.0,33.0]
+    gExtent = [10.0,33.0]
+    rExtent = [10.0,31.0]
+    iExtent = [9.0,31.0]
+    zExtent = [8.0,29.0]
+
+    if args.s is False:
+        header()
+
+    body(args.filepath)
