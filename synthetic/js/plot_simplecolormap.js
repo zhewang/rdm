@@ -1,4 +1,4 @@
-var nanocube_server_url = 'http://localhost:29512/';
+var nanocube_server_url = 'http://hdc.cs.arizona.edu/nanocube/10010/';
 var quadtree_level = 25;
 var variable_schema = ['count', '0', '1', '2', '0*0', '0*1', '0*2', '1*1', '1*2', '2*2'];
 nc.setup(variable_schema);
