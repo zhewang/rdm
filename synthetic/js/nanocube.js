@@ -18,15 +18,25 @@ nc.setup = function (s) {
 };
 
 nc.query = function (q, f) {
+    console.log("------------------------");
+    var start = new Date().getTime();
     $.getJSON(q, function(data) {
         //f(nc._pca(data.root.val));
+        var mid = new Date().getTime();
+        console.log("Query Time: "+(mid-start)+"ms");
         if('val' in data.root) {
             data.root.val = nc._pca(data.root.val);
+            var end = new Date().getTime();
+            console.log("PCA Time: "+(end-mid)+"ms");
+            console.log("Total Time: "+(end-start)+"ms");
             f(data);
         } else if('children' in data.root) {
             for(var i = 0; i < data.root.children.length; i ++) {
                 data.root.children[i].val = nc._pca(data.root.children[i].val);
             }
+            var end = new Date().getTime();
+            console.log("PCA Time: "+(end-mid)+"ms");
+            console.log("Total Time: "+(end-start)+"ms");
             f(data);
         }
 
