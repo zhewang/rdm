@@ -1,4 +1,5 @@
 bin/
+nanocube/
 *.json
 *.dmp
 *.csv
