@@ -19,7 +19,6 @@ def GetGaussInt(a, b):
 def header():
     header = "name: test_file\n"+ \
              "encoding: binary\n"+ \
-             "metadata: location__origin degrees_mercator_quadtree{0}\n"+ \
              "field: location nc_dim_quadtree_{0}\n"+ \
              "field: test_category nc_dim_cat_1\n"+ \
              "valname: test_category 0 CATEGORY_A\n"+ \
