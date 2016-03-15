@@ -21,13 +21,19 @@
             float:left; 
             margin-left: 50px;
         }
+        .oneline {
+            margin-left: 50px;
+            width: 70px;
+            overflow: hidden;
+            white-space: nowrap;
+        }
         </style>
     </head>
     <body>
-        <div class="left" id="heatmap"></div>
-        <div class="left">
+        <div class="oneline">
             <p>Dive Level:</p>
             <select id="levelChange"></select>
         </div>
+        <div class="left" id="heatmap"></div>
     </body>
 </html>
