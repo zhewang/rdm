@@ -114,9 +114,15 @@ function plot(diveLevel) {
 
     nc.query(q, function(d){
         var data = d.root.children;
+        var countExtent = d3.extent(data, function(d){
+            return d.val.count
+        });
+        countExtent[0] = 0;
+        var opacityScale = d3.scale.linear().domain(countExtent).range([0, 1]);
 
         var binSel = svgSel.selectAll("rect").data(data).enter()
         .append("rect")
+        .attr('opacity', function(d){return opacityScale(d.val.count)})
         .call(setBin);
 
         //svg2img('plot');
