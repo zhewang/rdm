@@ -25,7 +25,7 @@ def body(filepath):
         reader = csv.reader(csvfile, delimiter=',')
         for row in reader:
             key = [float(row[6]), float(row[7])]
-            v = [1]
+            v = []
             v.append(float(row[6])-float(row[11]))
             v.append(float(row[7])-float(row[12]))
             v.append(float(row[8])-float(row[13]))
@@ -37,7 +37,7 @@ def body(filepath):
             v.append(float(row[19]))
             v.append(float(row[20]))
 
-            var = v
+            var = [1]+v
             if flag is True:
                 data_schema.append('count')
                 for i in range(len(v)):
