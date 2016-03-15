@@ -57,15 +57,22 @@ nc._pca = function (vec) {
     }
 
     // build the upper triangular area
-    for(var row = 0; row < d; row ++) {
-        for(var col = row; col < d; col ++) {
-            var sum_x = vec[s[String(row)]];
-            var sum_y = vec[s[String(col)]];
-            var sum_xy = vec[s[String(row)+'*'+String(col)]];
-            var count = vec[s.count];
-            covMat[row][col] = (sum_xy-sum_x*sum_y/count)/(count-1);
+    var count = vec[s.count];
+    if(count == 1) {
+        for(var row = 0; row < d; row ++) {
+            covMat[row][row] = 25.5;
+        }
+    } else {
+        for(var row = 0; row < d; row ++) {
+            for(var col = row; col < d; col ++) {
+                var sum_x = vec[s[String(row)]];
+                var sum_y = vec[s[String(col)]];
+                var sum_xy = vec[s[String(row)+'*'+String(col)]];
+                covMat[row][col] = (sum_xy-sum_x*sum_y/count)/(count-1);
+            }
         }
     }
+
     // fill the lower triangular area
     for(var row = 1; row < d; row ++) {
         for(var col = 0; col < row; col ++) {
