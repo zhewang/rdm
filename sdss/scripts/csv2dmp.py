@@ -5,6 +5,20 @@ import itertools
 import struct
 import sys
 
+def isfloat(value):
+    try:
+        float(value)
+        return True
+    except ValueError:
+        return False
+
+def noNull(row):
+    legal = True
+    for i in range(6, 21):
+        if isfloat(row[i]) is False:
+            legal = False
+    return legal
+
 def header():
     header = "name: sdss_dr7_stars\n"+ \
              "encoding: binary\n"+ \
@@ -21,55 +35,66 @@ def header():
 def body(filepath):
     global flag
     data_schema = []
+    filteredCount = 0
+    legalCount = 0
     with open(filepath, 'r') as csvfile:
         reader = csv.reader(csvfile, delimiter=',')
         for row in reader:
-            key = [float(row[6]), float(row[7])]
-            v = []
-            v.append(float(row[6])-float(row[11]))
-            v.append(float(row[7])-float(row[12]))
-            v.append(float(row[8])-float(row[13]))
-            v.append(float(row[9])-float(row[14]))
-            v.append(float(row[10])-float(row[15]))
-            v.append(float(row[16]))
-            v.append(float(row[17]))
-            v.append(float(row[18]))
-            v.append(float(row[19]))
-            v.append(float(row[20]))
+            if noNull(row) is False:
+                filteredCount += 1
+            else:
+                legalCount += 1
+                key = [float(row[6]), float(row[7])]
+                v = []
+                v.append(float(row[6])-float(row[11]))
+                v.append(float(row[7])-float(row[12]))
+                v.append(float(row[8])-float(row[13]))
+                v.append(float(row[9])-float(row[14]))
+                v.append(float(row[10])-float(row[15]))
+                v.append(float(row[16]))
+                v.append(float(row[17]))
+                v.append(float(row[18]))
+                v.append(float(row[19]))
+                v.append(float(row[20]))
 
-            var = [1]+v
-            if flag is True:
-                data_schema.append('count')
-                for i in range(len(v)):
-                    data_schema.append(str(i))
-
-            comb = itertools.combinations_with_replacement(range(DIMS), 2)
-            for c in comb:
-                var.append(v[int(c[0])]*v[int(c[1])])
+                var = [1]+v
                 if flag is True:
-                    data_schema.append(str(c[0])+'*'+str(c[1]))
+                    data_schema.append('count')
+                    for i in range(len(v)):
+                        data_schema.append(str(i))
 
-            if flag is True:
-                print("NanoCube variable dimensions: "+str(count))
-                print("NanoCube quadtree level: "+str(LEVEL))
-                print('Variable Schema: {}'.format(data_schema))
-                flag = False
-                if args.s is True:
-                    sys.exit(0)
+                comb = itertools.combinations_with_replacement(range(DIMS), 2)
+                for c in comb:
+                    var.append(v[int(c[0])]*v[int(c[1])])
+                    if flag is True:
+                        data_schema.append(str(c[0])+'*'+str(c[1]))
 
-            # Dump
-            pack_str = '<iiH' + 'd'*count
+                if flag is True:
+                    print("NanoCube variable dimensions: "+str(count))
+                    print("NanoCube quadtree level: "+str(LEVEL))
+                    print('Variable Schema: {}'.format(data_schema))
+                    flag = False
+                    if args.s is True:
+                        sys.exit(0)
 
-            resolution = 2**LEVEL
-            xMin = uExtent[0]
-            yMin = gExtent[0]
-            xRange = uExtent[1]-uExtent[0]
-            yRange = gExtent[1]-gExtent[0]
+                # Dump
+                pack_str = '<iiH' + 'd'*count
 
-            xTile = int(resolution*((key[0]*1.0-xMin)/xRange))
-            yTile = int(resolution*((key[1]*1.0-yMin)/yRange))
-            binStr = struct.pack(pack_str,xTile,yTile,0,*var)
-            sys.stdout.write(binStr)
+                resolution = 2**LEVEL
+                xMin = uExtent[0]
+                yMin = gExtent[0]
+                xRange = uExtent[1]-uExtent[0]
+                yRange = gExtent[1]-gExtent[0]
+
+                xTile = int(resolution*((key[0]*1.0-xMin)/xRange))
+                yTile = int(resolution*((key[1]*1.0-yMin)/yRange))
+                binStr = struct.pack(pack_str,xTile,yTile,0,*var)
+                sys.stdout.write(binStr)
+
+    with open(filepath+'.stat', 'w') as f:
+        f.write('Original total Count: {}\n'.format(filteredCount+legalCount))
+        f.write('Valid row count: {}\n'.format(legalCount))
+        f.write('Has missing value: {}\n'.format(filteredCount))
 
 
 if __name__ == '__main__':
