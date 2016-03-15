@@ -201,7 +201,7 @@ function U_CountAveVar(rectSel, data) {
             return d3.hsl(h,s,0.5);
         })
         .on('click', function(d){
-            //console.log(d);
+            console.log(d);
             var a = d.val[1]/d.val[0];
             var v = calVariance(d);
             var c = d.val[0];
