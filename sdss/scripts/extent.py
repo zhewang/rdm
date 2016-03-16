@@ -11,10 +11,12 @@ def isfloat(value):
     except ValueError:
         return False
 
-def noNull(row):
+def sanityCheck(row):
     legal = True
     for i in range(6, 21):
         if isfloat(row[i]) is False:
+            legal = False
+        elif float(row[i]) < 0:
             legal = False
     return legal
 
@@ -28,8 +30,10 @@ if __name__ == '__main__':
 
     uMax = gMax = rMax = iMax = zMax = g_rMax = i_zMax = -99999999999
     uMin = gMin = rMin = iMin = zMin = g_rMin = i_zMin = 99999999999
+
+    dropped = 0
     for row in reader:
-        if noNull(row) is True:
+        if sanityCheck(row) is True:
             u = float(row[6])-float(row[11])
             g = float(row[7])-float(row[12])
             r = float(row[8])-float(row[13])
@@ -51,6 +55,8 @@ if __name__ == '__main__':
             i_zMax = max(i_zMax, i-z)
             g_rMin = min(g_rMin, g-r)
             i_zMin = min(i_zMin, i-z)
+        else:
+            dropped += 1
 
     print('uExtent = [{},{}]'.format(math.floor(uMin), math.ceil(uMax)))
     print('gExtent = [{},{}]'.format(math.floor(gMin), math.ceil(gMax)))
@@ -59,3 +65,4 @@ if __name__ == '__main__':
     print('zExtent = [{},{}]'.format(math.floor(zMin), math.ceil(zMax)))
     print('g_rExtent = [{},{}]'.format(math.floor(g_rMin), math.ceil(g_rMax)))
     print('i_zExtent = [{},{}]'.format(math.floor(i_zMin), math.ceil(i_zMax)))
+    print("Dropped rows: {}".format(dropped))
