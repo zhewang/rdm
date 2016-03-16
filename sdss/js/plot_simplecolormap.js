@@ -21,7 +21,7 @@ for(var i = 0; i < variable_schema.length; i ++) {
 
 var xExtent = [-7,16];
 var yExtent = [-10,13];
-var qpath = [];
+var navHistory= []; // Store the history so that we can go back
 var navTileX = 0;
 var navTileY = 0;
 var navLevel = 0;
@@ -40,7 +40,7 @@ $(document).ready(function(){
     .text(function(d){ return d;});
 
     sel.on('change', function(d){
-        diveLevel = 5;
+        diveLevel = this.value;
         plot();
     });
 
@@ -61,6 +61,7 @@ function plot() {
         '/count.a("location",dive(tile2d('+navTileX+','+navTileY+','+navLevel+'),'+
             diveLevel+'),"img")';
     nc.query(q, function(d){
+        // TODO: if the data sent back is empty, return to last valid query
         // Plot different kinds of heatmap here
         //plotHeatmap(d, CovMatColorMap, RepackWithPCA);
         plotHeatmap(d, onlyCount);
@@ -167,7 +168,11 @@ function plotHeatmap(data,
         d3.select("#heatmap").selectAll("rect").remove();
 
         // update
-        qpath.push(d);
+        navHistory.push({
+            'navLevel':navLevel,
+            'navTileX':navTileX,
+            'navTileY':navTileY
+        });
         navLevel += 1;
 
         xExtent = [-7,16];
@@ -220,6 +225,22 @@ function navBtnClick(btn){
         if(btn.value == 'up') {
             var newY = navTileY + 1;
             navTileY = Math.min(Math.pow(2,navLevel)-1, newY);
+        }
+        if(btn.value == 'zoomout') {
+            if(navHistory.length > 0) {
+                var lastOp = navHistory[navHistory.length-1];
+                navTileX = lastOp.navTileX;
+                navTileY = lastOp.navTileY;
+                navLevel = lastOp.navLevel;
+                navHistory.pop();
+            }
+        }
+        if(btn.value == 'reset') {
+            navHistory = [];
+            navTileX = 0;
+            navTileY = 0;
+            navLevel = 0;
+            diveLevel = 5;
         }
         plot();
     }
