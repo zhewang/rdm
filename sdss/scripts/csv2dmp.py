@@ -44,13 +44,18 @@ def body(filepath):
                 filteredCount += 1
             else:
                 legalCount += 1
-                key = [float(row[6]), float(row[7])]
+                u = float(row[6])-float(row[11])
+                g = float(row[7])-float(row[12])
+                r = float(row[8])-float(row[13])
+                i = float(row[9])-float(row[14])
+                z = float(row[10])-float(row[15])
+                key = [g-r, i-z]
                 v = []
-                v.append(float(row[6])-float(row[11]))
-                v.append(float(row[7])-float(row[12]))
-                v.append(float(row[8])-float(row[13]))
-                v.append(float(row[9])-float(row[14]))
-                v.append(float(row[10])-float(row[15]))
+                v.append(u)
+                v.append(g)
+                v.append(r)
+                v.append(i)
+                v.append(z)
                 v.append(float(row[16]))
                 v.append(float(row[17]))
                 v.append(float(row[18]))
@@ -81,10 +86,10 @@ def body(filepath):
                 pack_str = '<iiH' + 'd'*count
 
                 resolution = 2**LEVEL
-                xMin = uExtent[0]
-                yMin = gExtent[0]
-                xRange = uExtent[1]-uExtent[0]
-                yRange = gExtent[1]-gExtent[0]
+                xMin = g_rExtent[0]
+                yMin = i_zExtent[0]
+                xRange = g_rExtent[1]-g_rExtent[0]
+                yRange = i_zExtent[1]-i_zExtent[0]
 
                 xTile = int(resolution*((key[0]*1.0-xMin)/xRange))
                 yTile = int(resolution*((key[1]*1.0-yMin)/yRange))
@@ -110,11 +115,13 @@ if __name__ == '__main__':
     DIMS = 10
     count = DIMS*(DIMS+1)/2 + DIMS + 1
 
-    uExtent = [12.0,33.0]
-    gExtent = [10.0,33.0]
-    rExtent = [10.0,31.0]
-    iExtent = [9.0,31.0]
-    zExtent = [8.0,29.0]
+    # uExtent = [12.0,33.0]
+    # gExtent = [10.0,33.0]
+    # rExtent = [10.0,31.0]
+    # iExtent = [9.0,31.0]
+    # zExtent = [8.0,29.0]
+    g_rExtent = [-7.0,16.0]
+    i_zExtent = [-10.0,13.0]
 
     if args.s is False:
         header()
