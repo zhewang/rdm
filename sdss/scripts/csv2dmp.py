@@ -115,13 +115,18 @@ if __name__ == '__main__':
     DIMS = 10
     count = DIMS*(DIMS+1)/2 + DIMS + 1
 
+    # SDSS Sample
     # uExtent = [12.0,33.0]
     # gExtent = [10.0,33.0]
     # rExtent = [10.0,31.0]
     # iExtent = [9.0,31.0]
     # zExtent = [8.0,29.0]
-    g_rExtent = [-7.0,16.0]
-    i_zExtent = [-10.0,13.0]
+    # g_rExtent = [-7.0,16.0]
+    # i_zExtent = [-10.0,13.0]
+
+    # SDSS 180M
+    g_rExtent = [-10054.0,10027.0]
+    i_zExtent = [-10031.0,10027.0]
 
     if args.s is False:
         header()
