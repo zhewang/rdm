@@ -261,7 +261,7 @@ function svg2img(svgID){
 function RepackWithPCA(original_data) {
 
     // Deep copy. TODO: more elegent way
-    var data = $.parseJSON(JSON.stringify(original_data));
+    var data = JSON.parse(JSON.stringify(original_data));
 
     if('val' in data.root) {
         data.root.val = CalculatePCA(data.root.val);
