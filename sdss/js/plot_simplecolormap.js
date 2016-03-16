@@ -65,7 +65,7 @@ function plotHeatmap(diveLevel, data,
     data = data.root.children;
 
     var xExtent = [-7,16];
-    var yExtent = [10,13];
+    var yExtent = [-10,13];
 
     var plotWidth = 500;
     var plotHeight = 500;
