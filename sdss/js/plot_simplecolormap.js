@@ -19,6 +19,14 @@ for(var i = 0; i < variable_schema.length; i ++) {
 // Common Functions to Setup the Page and Help Plot Heatmaps
 ///////////////////////////////////////////////////////////////////////////////
 
+var xExtent = [-7,16];
+var yExtent = [-10,13];
+var qpath = [];
+var navTileX = 0;
+var navTileY = 0;
+var navLevel = 0;
+var diveLevel = 5;
+
 // Change Dive Level
 $(document).ready(function(){
     var sel = d3.select('#levelChange');
@@ -32,40 +40,41 @@ $(document).ready(function(){
     .text(function(d){ return d;});
 
     sel.on('change', function(d){
-        plot(this.value);
+        diveLevel = 5;
+        plot();
     });
 
     document.getElementById('levelChange').value=5;
-    plot(5);
+    diveLevel = 5;
+    plot();
 
 });
 
-function plot(diveLevel) {
+function plot() {
     d3.select("#heatmap").selectAll("svg").remove();
     d3.select("#heatmap").selectAll("rect").remove();
 
+    //var q = nanocube_server_url+
+            //'/count.a("location",dive(tile2d(0,0,0),'+
+            //diveLevel+'),"img")';
     var q = nanocube_server_url+
-            '/count.a("location",dive(tile2d(0,0,0),'+
+        '/count.a("location",dive(tile2d('+navTileX+','+navTileY+','+navLevel+'),'+
             diveLevel+'),"img")';
-
     nc.query(q, function(d){
         // Plot different kinds of heatmap here
-        //plotHeatmap(diveLevel, d, CovMatColorMap, RepackWithPCA);
-        plotHeatmap(diveLevel, d, onlyCount);
-        plotHeatmap(diveLevel, d, U_CountAveVar);
+        //plotHeatmap(d, CovMatColorMap, RepackWithPCA);
+        plotHeatmap(d, onlyCount);
+        plotHeatmap(d, U_CountAveVar);
     });
 }
 
-function plotHeatmap(diveLevel, data,
+function plotHeatmap(data,
                      cellStyleFunc, // How to render each cell
                      dataTransformFunc=function(d){return d;} // Optional. Never change the original data.
                     )
 {
     data = dataTransformFunc(data);
     data = data.root.children;
-
-    var xExtent = [-7,16];
-    var yExtent = [-10,13];
 
     var plotWidth = 500;
     var plotHeight = 500;
@@ -135,17 +144,102 @@ function plotHeatmap(diveLevel, data,
     };
 
     svgSel.call(setAxisStyle);
+
+    // zoom
+    var position = {
+        0: {'x':0, 'y':0},
+        1: {'x':1, 'y':0},
+        2: {'x':0, 'y':1},
+        3: {'x':1, 'y':1},
+    }
+    svgSel.append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top+ ")")
+    .selectAll("rect").data([0,1,2,3]).enter().append("rect")
+    .attr("x",function(d){return position[d].x*(contentWidth/2);})
+    .attr("y",function(d){return contentHeight-(position[d].y+1)*(contentHeight/2);})
+    .attr("width",function(d){return contentWidth/2;})
+    .attr("height",function(d){return contentHeight/2;})
+    .attr('stroke', 'black')
+    .attr("fill", 'black')
+    .attr('opacity', 0.1)
+    .on('dblclick', function(d){
+        d3.select("#heatmap").selectAll("svg").remove();
+        d3.select("#heatmap").selectAll("rect").remove();
+
+        // update
+        qpath.push(d);
+        navLevel += 1;
+
+        xExtent = [-7,16];
+        yExtent = [-10,13];
+        var midX = (xExtent[0]+xExtent[1])/2;
+        var midY = (yExtent[0]+yExtent[1])/2;
+        if(d == 0) {
+            xExtent = [xExtent[0],midX];
+            yExtent=[yExtent[0],midY];
+            navTileX = navTileX*2;
+            navTileY = navTileY*2;
+        }
+        if(d == 1) {
+            xExtent = [midX,xExtent[1]];
+            yExtent=[yExtent[0],midY];
+            navTileX = navTileX*2+1;
+            navTileY = navTileY*2;
+        }
+        if(d == 2) {
+            xExtent = [xExtent[0],midX];
+            yExtent=[midY,yExtent[1]];
+            navTileX = navTileX*2;
+            navTileY = navTileY*2+1;
+        }
+        if(d == 3) {
+            xExtent = [midY,xExtent[1]];
+            yExtent=[midY,yExtent[1]];
+            navTileX = navTileX*2+1;
+            navTileY = navTileY*2+1;
+        }
+        plot();
+    });
+
+}
+
+function navBtnClick(btn){
+    if(navLevel > 0) {
+        if(btn.value == 'left') {
+            var newX = navTileX - 1;
+            navTileX = Math.max(0, newX);
+        }
+        if(btn.value == 'right') {
+            var newX = navTileX + 1;
+            navTileX = Math.min(Math.pow(2,navLevel)-1, newX);
+        }
+        if(btn.value == 'down') {
+            var newY = navTileY - 1;
+            navTileY = Math.max(0, newY);
+        }
+        if(btn.value == 'up') {
+            var newY = navTileY + 1;
+            navTileY = Math.min(Math.pow(2,navLevel)-1, newY);
+        }
+        plot();
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // Different Color Mapping Strategies
 ///////////////////////////////////////////////////////////////////////////////
+var onlyCountUtils = {
+    'countExtent': null
+};
 function onlyCount(rectSel, data) {
-    var countExtent = d3.extent(data, function(d){
-        return d.val[0];
-    });
-    countExtent[0] = 0;
-    var opacityScale = d3.scale.linear().domain(countExtent).range([0.05, 1]);
+    if(onlyCountUtils.countExtent == null) {
+        onlyCountUtils.countExtent = d3.extent(data, function(d){
+            return d.val[0];
+        });
+        onlyCountUtils.countExtent[0] = 0;
+    }
+    var opacityScale = d3.scale.linear()
+        .domain(onlyCountUtils.countExtent).range([0.05, 1]);
 
     rectSel.call(setCellStyle);
 

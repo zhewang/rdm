@@ -24,7 +24,7 @@
         }
         .oneline {
             margin-left: 50px;
-            width: 70px;
+            width: 500px;
             overflow: hidden;
             white-space: nowrap;
         }
@@ -34,6 +34,10 @@
         <div class="oneline">
             <p>Dive Level:</p>
             <select id="levelChange"></select>
+            <button onclick="navBtnClick(this)" value='left'>Left</button>
+            <button onclick="navBtnClick(this)" value='up'>Up</button>
+            <button onclick="navBtnClick(this)" value='down'>Down</button>
+            <button onclick="navBtnClick(this)" value='right'>Right</button>
         </div>
         <div class="left" id="heatmap"></div>
     </body>
