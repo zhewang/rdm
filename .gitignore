@@ -3,6 +3,8 @@ nanocube/
 *.json
 *.dmp
 *.csv
+*.fit
+*.stat
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
