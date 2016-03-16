@@ -125,8 +125,12 @@ if __name__ == '__main__':
     # i_zExtent = [-10.0,13.0]
 
     # SDSS 180M
-    g_rExtent = [-10054.0,10027.0]
-    i_zExtent = [-10031.0,10027.0]
+    # g_rExtent = [-10054.0,10027.0]
+    # i_zExtent = [-10031.0,10027.0]
+
+    # SDSS 180M, using statistics from sample data
+    g_rExtent = [-21,23]
+    i_zExtent = [-20,23]
 
     if args.s is False:
         header()
