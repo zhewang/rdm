@@ -1,5 +1,6 @@
-var nanocube_server_url = 'http://hdc.cs.arizona.edu/nanocube/10010/';
-var quadtree_level = 25;
+//var nanocube_server_url = 'http://hdc.cs.arizona.edu/nanocube/10010/';
+var nanocube_server_url = 'http://localhost:29513/';
+var quadtree_level = 15;
 var variable_schema = ['count', '0', '1', '2', '0*0', '0*1', '0*2', '1*1', '1*2', '2*2'];
 
 
@@ -58,8 +59,8 @@ function plotHeatmap(diveLevel, data,
     data = dataTransformFunc(data);
     data = data.root.children;
 
-    var xExtent = [12,33];
-    var yExtent = [10,33];
+    var xExtent = [0,10];
+    var yExtent = [0,10];
 
     var plotWidth = 500;
     var plotHeight = 500;
@@ -157,7 +158,7 @@ function CovMatColorMap(rectSel, data) {
             var b = Math.abs(Math.floor(d.val.cov_matrix[2][2]*10));
             return 'rgb({0},{1},{2})'.format(r,g,b);
         })
-        .attr('opacity', function(d){return opacityScale(d.val.count)})
+        //.attr('opacity', function(d){return opacityScale(d.val.count)})
         .on('click', function(d){ console.log(d); });
     }
 }

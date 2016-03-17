@@ -43,7 +43,7 @@ def body():
         key = [n%4+0.5, n%4+0.5, 1]
         if args.f is False:
             key = [random.uniform(0.00001,10) for i in range(DIMS-1)]
-            key.append(5*math.sqrt(2)-abs(key[0]-key[1])/math.sqrt(2))
+            key.append(10-abs(key[0]-key[1]))
         mean = [0 for i in range(DIMS)]
         cov = np.diag(key)
         v = np.random.multivariate_normal(mean, cov).tolist()
@@ -90,7 +90,7 @@ if __name__ == '__main__':
     parser.add_argument('-s', action='store_true', default=False, help='only show schema of dmp file')
     parser.add_argument('-d', type=int, default=3, help='dimension of features')
     parser.add_argument('-r', type=int, default=1, help='number of rows')
-    parser.add_argument('-l', type=int, default=20, help='quadtree level')
+    parser.add_argument('-l', type=int, default=15, help='quadtree level')
     args = parser.parse_args()
     DIMS = args.d
     ROWS = args.r
