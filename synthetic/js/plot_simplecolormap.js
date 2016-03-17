@@ -153,9 +153,9 @@ function CovMatColorMap(rectSel, data) {
 
     function setCellStyle(sel) {
         sel.attr("fill", function(d){
-            var r = Math.abs(Math.floor(d.val.cov_matrix[0][0]*10));
-            var g = Math.abs(Math.floor(d.val.cov_matrix[1][1]*10));
-            var b = Math.abs(Math.floor(d.val.cov_matrix[2][2]*10));
+            var r = Math.abs(Math.floor(d.val.cov_matrix[0][0]/10*200));
+            var g = Math.abs(Math.floor(d.val.cov_matrix[1][1]/10*200));
+            var b = Math.abs(Math.floor(d.val.cov_matrix[2][2]/10*200));
             return 'rgb({0},{1},{2})'.format(r,g,b);
         })
         //.attr('opacity', function(d){return opacityScale(d.val.count)})
