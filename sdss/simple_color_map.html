@@ -24,7 +24,7 @@
         }
         .oneline {
             margin-left: 50px;
-            width: 500px;
+            width: 800px;
             overflow: hidden;
             white-space: nowrap;
         }
@@ -35,12 +35,12 @@
             <p>Dive Level:</p>
             <select id="levelChange"></select>
             <button onclick="navBtnClick(this)" value='left'>Left</button>
+            <button onclick="navBtnClick(this)" value='right'>Right</button>
             <button onclick="navBtnClick(this)" value='up'>Up</button>
             <button onclick="navBtnClick(this)" value='down'>Down</button>
-            <button onclick="navBtnClick(this)" value='right'>Right</button>
             <button onclick="navBtnClick(this)" value='zoomout'>Zoom Out</button>
             <button onclick="navBtnClick(this)" value='reset'>Reset</button>
-            <text>[Double Click to Zoom In]</text>
+            <text>[Double Click on the Scatter Plot to Zoom In]</text>
         </div>
         <div class="left" id="heatmap"></div>
     </body>

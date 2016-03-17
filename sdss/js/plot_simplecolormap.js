@@ -91,10 +91,10 @@ function CreateHeatmap(cellStyleFunc, dataTransformFunc){
     plot.xScale = d3.scale.linear().domain(xExtent).range([0, contentWidth]);
     plot.yScale = d3.scale.linear().domain(yExtent).range([contentHeight, 0]);
 
-    var gridXSize = (plot.xScale(xExtent[1])-plot.xScale(xExtent[0]))/Math.pow(2,diveLevel);
-    var gridYSize = (plot.yScale(yExtent[0]-plot.yScale(yExtent[1])))/Math.pow(2,diveLevel);
 
-    plot.setRectPosition = function (sel, cellStyleFunc) {
+    plot.setRectPosition = function (sel) {
+        var gridXSize = (plot.xScale(xExtent[1])-plot.xScale(xExtent[0]))/Math.pow(2,diveLevel);
+        var gridYSize = (plot.yScale(yExtent[0]-plot.yScale(yExtent[1])))/Math.pow(2,diveLevel);
         sel.attr("x", function(d) {
             return d.x*gridXSize;
         })
@@ -151,7 +151,7 @@ function CreateHeatmap(cellStyleFunc, dataTransformFunc){
     .attr("height",function(d){return contentHeight/2;})
     .attr('stroke', 'black')
     .attr("fill", 'black')
-    .attr('opacity', 0.1)
+    .attr('opacity', 0.05)
     .on('dblclick', function(d){
         d3.event.stopPropagation();
 
@@ -283,7 +283,7 @@ function onlyCount(rectSel, data) {
         onlyCountUtils.countExtent[0] = 0;
     }
     var opacityScale = d3.scale.linear()
-        .domain(onlyCountUtils.countExtent).range([0.05, 1]);
+        .domain(onlyCountUtils.countExtent).range([0.1, 1]);
 
     rectSel.call(setCellStyle);
 
@@ -322,9 +322,7 @@ function U_CountAveVar(rectSel, data) {
         });
     }
 
-    var opacityScale = d3.scale.linear()
-        .domain(U_CAVUtils.countExtent)
-        .range([0.05, 1]);
+    var opacityScale = d3.scale.linear().domain(U_CAVUtils.countExtent).range([0.1, 1]);
     var hueScale = d3.scale.linear().domain(U_CAVUtils.uAveExtent).range([0, 360]);
     var saturationScale = d3.scale.linear().domain(U_CAVUtils.uVarExtent).range([0,1]);
 
