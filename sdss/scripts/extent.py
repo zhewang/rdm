@@ -16,8 +16,21 @@ def sanityCheck(row):
     for i in range(6, 21):
         if isfloat(row[i]) is False:
             legal = False
-        elif float(row[i]) < 0:
+            return legal
+        elif row[i] < 0:
             legal = False
+            return legal
+
+    g = float(row[7])-float(row[12])
+    r = float(row[8])-float(row[13])
+    i = float(row[9])-float(row[14])
+    z = float(row[10])-float(row[15])
+
+    if g-r > g_rExtent[1] or g-r < g_rExtent[0]:
+        legal = False
+    if i-z > i_zExtent[1] or i-z < i_zExtent[0]:
+        legal = False
+
     return legal
 
 if __name__ == '__main__':
@@ -57,6 +70,7 @@ if __name__ == '__main__':
             i_zMin = min(i_zMin, i-z)
         else:
             dropped += 1
+            print(row)
 
     print('uExtent = [{},{}]'.format(math.floor(uMin), math.ceil(uMax)))
     print('gExtent = [{},{}]'.format(math.floor(gMin), math.ceil(gMax)))

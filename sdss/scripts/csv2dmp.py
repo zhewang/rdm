@@ -12,11 +12,26 @@ def isfloat(value):
     except ValueError:
         return False
 
-def noNull(row):
+def sanityCheck(row):
     legal = True
     for i in range(6, 21):
         if isfloat(row[i]) is False:
             legal = False
+            return legal
+        elif row[i] < 0:
+            legal = False
+            return legal
+
+    g = float(row[7])-float(row[12])
+    r = float(row[8])-float(row[13])
+    i = float(row[9])-float(row[14])
+    z = float(row[10])-float(row[15])
+
+    if g-r > g_rExtent[1] or g-r < g_rExtent[0]:
+        legal = False
+    if i-z > i_zExtent[1] or i-z < i_zExtent[0]:
+        legal = False
+
     return legal
 
 def header():
@@ -40,7 +55,7 @@ def body(filepath):
     with open(filepath, 'r') as csvfile:
         reader = csv.reader(csvfile, delimiter=',')
         for row in reader:
-            if noNull(row) is False:
+            if sanityCheck(row) is False:
                 filteredCount += 1
             else:
                 legalCount += 1
