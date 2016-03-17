@@ -266,18 +266,27 @@ function navBtnClick(btn){
 ///////////////////////////////////////////////////////////////////////////////
 // Different Color Mapping Strategies
 ///////////////////////////////////////////////////////////////////////////////
-var onlyCountUtils = {
-    'countExtent': null
-};
+//var onlyCountUtils = {
+    //'countExtent': null
+//};
 function onlyCount(rectSel, data) {
-    if(onlyCountUtils.countExtent == null) {
-        onlyCountUtils.countExtent = d3.extent(data, function(d){
-            return d.val[0];
-        });
-        onlyCountUtils.countExtent[0] = 0;
-    }
+    // Use the same count scale
+    //if(onlyCountUtils.countExtent == null) {
+        //onlyCountUtils.countExtent = d3.extent(data, function(d){
+            //return d.val[0];
+        //});
+        //onlyCountUtils.countExtent[0] = 0;
+    //}
+    //var opacityScale = d3.scale.linear()
+        //.domain(onlyCountUtils.countExtent).range([0.1, 1]);
+
+    // Calculate count scale every time
+    var countExtent = d3.extent(data, function(d){
+        return d.val[0];
+    });
+    countExtent[0] = 0;
     var opacityScale = d3.scale.linear()
-        .domain(onlyCountUtils.countExtent).range([0.1, 1]);
+        .domain(countExtent).range([0.1, 1]);
 
     rectSel.call(setCellStyle);
 
@@ -302,20 +311,18 @@ function U_CountAveVar(rectSel, data) {
         return Math.max(0, variance);
     }
 
-    if(U_CAVUtils.countExtent == null) {
-        U_CAVUtils.countExtent = d3.extent(data, function(d){
-            return d.val[0];
-        });
-        U_CAVUtils.countExtent[0] = 0;
+    U_CAVUtils.countExtent = d3.extent(data, function(d){
+        return d.val[0];
+    });
+    U_CAVUtils.countExtent[0] = 0;
 
-        U_CAVUtils.uAveExtent = d3.extent(data, function(d){
-            return d.val[1]/d.val[0];
-        });
+    U_CAVUtils.uAveExtent = d3.extent(data, function(d){
+        return d.val[1]/d.val[0];
+    });
 
-        U_CAVUtils.uVarExtent = d3.extent(data, function(d){
-            return calVariance(d);
-        });
-    }
+    U_CAVUtils.uVarExtent = d3.extent(data, function(d){
+        return calVariance(d);
+    });
 
     var opacityScale = d3.scale.linear().domain(U_CAVUtils.countExtent).range([0.1, 1]);
     var hueScale = d3.scale.linear().domain(U_CAVUtils.uAveExtent).range([0, 360]);
