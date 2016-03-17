@@ -52,16 +52,12 @@ $(document).ready(function(){
 });
 
 function plotAll() {
-    //var q = nanocube_server_url+
-            //'/count.a("location",dive(tile2d(0,0,0),'+
-            //diveLevel+'),"img")';
     var q = nanocube_server_url+
         '/count.a("location",dive(tile2d('+navTileX+','+navTileY+','+navLevel+'),'+
             diveLevel+'),"img")';
     nc.query(q, function(d){
         // TODO: if the data sent back is empty, return to last valid query
-        // Plot different kinds of heatmap here
-        //plotHeatmap(d, CovMatColorMap, RepackWithPCA);
+        plotHeatmap(d, CovMatColorMap, RepackWithPCA);
         plotHeatmap(d, onlyCount);
         plotHeatmap(d, U_CountAveVar);
     });
@@ -153,9 +149,6 @@ function CreateHeatmap(cellStyleFunc, dataTransformFunc){
     .attr("fill", 'black')
     .attr('opacity', 0.05)
     .on('dblclick', function(d){
-        d3.event.stopPropagation();
-
-        // update
         navHistory.push({
             'navLevel':navLevel,
             'navTileX':navTileX,
@@ -165,6 +158,7 @@ function CreateHeatmap(cellStyleFunc, dataTransformFunc){
         });
         navLevel += 1;
 
+        // update
         var midX = (xExtent[0]+xExtent[1])/2;
         var midY = (yExtent[0]+yExtent[1])/2;
         if(d == 0) {
@@ -294,6 +288,7 @@ function onlyCount(rectSel, data) {
     }
 }
 
+///////////////////////////////////////////////////////////////////////////////
 // Count, Average(u), Variance(u)
 var U_CAVUtils = {
     'countExtent': null,
@@ -346,6 +341,7 @@ function U_CountAveVar(rectSel, data) {
     }
 }
 
+///////////////////////////////////////////////////////////////////////////////
 function CovMatColorMap(rectSel, data) {
     var countExtent = d3.extent(data, function(d){
         return d.val.count
