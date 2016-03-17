@@ -57,7 +57,7 @@ function plotAll() {
             diveLevel+'),"img")';
     nc.query(q, function(d){
         // TODO: if the data sent back is empty, return to last valid query
-        plotHeatmap(d, CovMatColorMap, RepackWithPCA);
+        //plotHeatmap(d, CovMatColorMap, RepackWithPCA);
         plotHeatmap(d, onlyCount);
         plotHeatmap(d, U_CountAveVar);
     });
