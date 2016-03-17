@@ -19,6 +19,7 @@ for(var i = 0; i < variable_schema.length; i ++) {
 // Common Functions to Setup the Page and Help Plot Heatmaps
 ///////////////////////////////////////////////////////////////////////////////
 
+var plots = {};
 var xExtent = [-7,16];
 var yExtent = [-10,13];
 var navHistory= []; // Store the history so that we can go back
@@ -41,19 +42,16 @@ $(document).ready(function(){
 
     sel.on('change', function(d){
         diveLevel = this.value;
-        plot();
+        plotAll();
     });
 
     document.getElementById('levelChange').value=5;
     diveLevel = 5;
-    plot();
+    plotAll();
 
 });
 
-function plot() {
-    d3.select("#heatmap").selectAll("svg").remove();
-    d3.select("#heatmap").selectAll("rect").remove();
-
+function plotAll() {
     //var q = nanocube_server_url+
             //'/count.a("location",dive(tile2d(0,0,0),'+
             //diveLevel+'),"img")';
@@ -69,16 +67,11 @@ function plot() {
     });
 }
 
-function plotHeatmap(data,
-                     cellStyleFunc, // How to render each cell
-                     dataTransformFunc=function(d){return d;} // Optional. Never change the original data.
-                    )
-{
-    data = dataTransformFunc(data);
-    data = data.root.children;
+function CreateHeatmap(cellStyleFunc, dataTransformFunc){
+    var plot = {};
 
-    var plotWidth = 500;
-    var plotHeight = 500;
+    plot.plotWidth = 500;
+    plot.plotHeight = 500;
 
     var margin = { top: 10, right: 30, bottom: 30, left: 30 };
     var viewBoxWidth = 500;
@@ -88,48 +81,46 @@ function plotHeatmap(data,
     var contentHeight = viewBoxHeight-margin.top-margin.bottom;
 
     // plot heatmap
-    var svgSel = d3.select("#heatmap")
+    plot.svgSel = d3.select("#heatmap")
         .append("svg")
-        .attr("width", plotWidth)
-        .attr("height", plotHeight)
+        .attr("width", plot.plotWidth)
+        .attr("height", plot.plotHeight)
         .attr('viewBox', '0 0 '+viewBoxWidth+' '+viewBoxHeight)
         .attr('id', 'plot');
 
-    var xScale = d3.scale.linear().domain(xExtent).range([0, contentWidth]);
-    var yScale = d3.scale.linear().domain(yExtent).range([contentHeight, 0]);
+    plot.xScale = d3.scale.linear().domain(xExtent).range([0, contentWidth]);
+    plot.yScale = d3.scale.linear().domain(yExtent).range([contentHeight, 0]);
 
-    var gridXSize = (xScale(xExtent[1])-xScale(xExtent[0]))/Math.pow(2,diveLevel);
-    var gridYSize = (yScale(yExtent[0]-yScale(yExtent[1])))/Math.pow(2,diveLevel);
+    var gridXSize = (plot.xScale(xExtent[1])-plot.xScale(xExtent[0]))/Math.pow(2,diveLevel);
+    var gridYSize = (plot.yScale(yExtent[0]-plot.yScale(yExtent[1])))/Math.pow(2,diveLevel);
 
-    svgSel.append("g")
-        .attr("transform", "translate(" + margin.left + "," + margin.top+ ")")
-        .selectAll("rect").data(data).enter()
-        .append("rect")
-        .attr("x", function(d) {
+    plot.setRectPosition = function (sel, cellStyleFunc) {
+        sel.attr("x", function(d) {
             return d.x*gridXSize;
         })
         .attr("y", function(d) {
             return contentHeight-(d.y+1)*gridYSize;
         })
         .attr("width", gridXSize)
-        .attr("height", gridYSize)
-        .call(cellStyleFunc, data);
+        .attr("height", gridYSize);
+    }
+
+    plot.rectSel = plot.svgSel.append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top+ ")");
 
     // Draw the axis
-    var xAxis = d3.svg.axis().scale(xScale).ticks(10);
-    var yAxis = d3.svg.axis().scale(yScale).ticks(10);
+    plot.xAxis = d3.svg.axis().scale(plot.xScale).ticks(10);
+    plot.yAxis = d3.svg.axis().scale(plot.yScale).ticks(10);
 
-    svgSel.append("g")
+    plot.xAxisGroup = plot.svgSel.append("g")
     .attr("transform", "translate("+margin.left+", "+
-          (contentHeight+margin.top).toString()+")")
-    .call(xAxis);
+          (contentHeight+margin.top).toString()+")");
 
-    yAxis.orient("left");
-    svgSel.append("g")
-    .attr("transform", "translate("+margin.left+", "+margin.top+")")
-    .call(yAxis);
+    plot.yAxis.orient("left");
+    plot.yAxisGroup = plot.svgSel.append("g")
+    .attr("transform", "translate("+margin.left+", "+margin.top+")");
 
-    var setAxisStyle = function (sel) {
+    plot.setAxisStyle = function (sel) {
         sel.selectAll('.domain')
         .attr('stroke-width', 2)
         .attr('stroke', 'black')
@@ -144,8 +135,6 @@ function plotHeatmap(data,
         .attr('font-size', 10);
     };
 
-    svgSel.call(setAxisStyle);
-
     // zoom
     var position = {
         0: {'x':0, 'y':0},
@@ -153,7 +142,7 @@ function plotHeatmap(data,
         2: {'x':0, 'y':1},
         3: {'x':1, 'y':1},
     }
-    svgSel.append("g")
+    plot.svgSel.append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top+ ")")
     .selectAll("rect").data([0,1,2,3]).enter().append("rect")
     .attr("x",function(d){return position[d].x*(contentWidth/2);})
@@ -164,19 +153,18 @@ function plotHeatmap(data,
     .attr("fill", 'black')
     .attr('opacity', 0.1)
     .on('dblclick', function(d){
-        d3.select("#heatmap").selectAll("svg").remove();
-        d3.select("#heatmap").selectAll("rect").remove();
+        d3.event.stopPropagation();
 
         // update
         navHistory.push({
             'navLevel':navLevel,
             'navTileX':navTileX,
-            'navTileY':navTileY
+            'navTileY':navTileY,
+            'xExtent':xExtent,
+            'yExtent':yExtent
         });
         navLevel += 1;
 
-        xExtent = [-7,16];
-        yExtent = [-10,13];
         var midX = (xExtent[0]+xExtent[1])/2;
         var midY = (yExtent[0]+yExtent[1])/2;
         if(d == 0) {
@@ -203,9 +191,38 @@ function plotHeatmap(data,
             navTileX = navTileX*2+1;
             navTileY = navTileY*2+1;
         }
-        plot();
+        plotAll();
     });
+    return plot;
+}
 
+function plotHeatmap(data,
+                     cellStyleFunc, // How to render each cell
+                     dataTransformFunc=function(d){return d;} // Optional. Never change the original data.
+                    )
+{
+    if(!plots[cellStyleFunc.name]) {
+        plots[cellStyleFunc.name] = CreateHeatmap(cellStyleFunc,
+                                                  dataTransformFunc);
+    }
+    data = dataTransformFunc(data);
+    data = data.root.children;
+
+    var plot = plots[cellStyleFunc.name];
+    var xScale = plot.xScale.domain(xExtent);
+    var yScale = plot.yScale.domain(yExtent);
+
+    plot.rectSel.selectAll('rect').remove();
+    plot.rectSel.selectAll('rect')
+    .data(data).enter().append('rect')
+    .call(plot.setRectPosition)
+    .call(cellStyleFunc, data);
+
+    var xScale = plot.xScale.domain(xExtent);
+    var yScale = plot.yScale.domain(yExtent);
+
+    plot.xAxisGroup.transition().call(plot.xAxis).call(plot.setAxisStyle);
+    plot.yAxisGroup.transition().call(plot.yAxis).call(plot.setAxisStyle);
 }
 
 function navBtnClick(btn){
@@ -232,6 +249,8 @@ function navBtnClick(btn){
                 navTileX = lastOp.navTileX;
                 navTileY = lastOp.navTileY;
                 navLevel = lastOp.navLevel;
+                xExtent = lastOp.xExtent;
+                yExtent = lastOp.yExtent;
                 navHistory.pop();
             }
         }
@@ -241,8 +260,12 @@ function navBtnClick(btn){
             navTileY = 0;
             navLevel = 0;
             diveLevel = 5;
+            xExtent = [-7,16];
+            yExtent = [-10,13];
+            diveLevel = 5;
+            document.getElementById('levelChange').value=5;
         }
-        plot();
+        plotAll();
     }
 }
 
