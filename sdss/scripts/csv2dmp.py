@@ -37,6 +37,7 @@ def sanityCheck(row):
 def header():
     header = "name: sdss_dr7_stars\n"+ \
              "encoding: binary\n"+ \
+             "metadata: location__origin degrees_mercator_quadtree{0}\n"+ \
              "field: location nc_dim_quadtree_{0}\n"+ \
              "metadata: tbin 2016-01-01_00:00:00_3600s\n"+ \
              "field: time nc_dim_time_2\n"
