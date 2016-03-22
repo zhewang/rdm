@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8"/>
+        <script src="../common/js/d3.v3.js"></script>
+        <script src="../common/js/jquery.js"></script>
+        <script src="../common/js/numeric-1.2.6.min.js"></script>
+        <script src="../common/js/nanocube.js"></script>
+
+        <script src="./js/plot_avg.js"></script>
+        <style>
+        body {
+            font: 10px sans-serif;
+        }
+        .brush .extent {
+            fill-opacity: .1;
+            stroke: #fff;
+            shape-rendering: crispEdges;
+        }
+        .left{
+            float:left; 
+            margin-left: 50px;
+            margin-top: 30px;
+        }
+        .oneline {
+            margin-left: 50px;
+            width: 800px;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+        </style>
+    </head>
+    <body>
+        <div class="oneline">
+            <p>Dive Level:</p>
+            <select id="levelChange"></select>
+            <button onclick="navBtnClick(this)" value='left'>Left</button>
+            <button onclick="navBtnClick(this)" value='right'>Right</button>
+            <button onclick="navBtnClick(this)" value='up'>Up</button>
+            <button onclick="navBtnClick(this)" value='down'>Down</button>
+            <button onclick="navBtnClick(this)" value='zoomout'>Zoom Out</button>
+            <button onclick="navBtnClick(this)" value='reset'>Reset</button>
+            <text>[Double Click on the Scatter Plot to Zoom In]</text>
+        </div>
+        <div class="left" id="heatmap"></div>
+    </body>
+</html>
