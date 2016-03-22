@@ -59,7 +59,7 @@ function plotAll() {
         // TODO: if the data sent back is empty, return to last valid query
         //plotHeatmap(d, CovMatColorMap, RepackWithPCA);
         plotHeatmap(d, onlyCount);
-        plotHeatmap(d, U_CountAveVar);
+        //plotHeatmap(d, U_CountAveVar);
     });
 }
 
@@ -284,9 +284,9 @@ function onlyCount(rectSel, data) {
     var countExtent = d3.extent(data, function(d){
         return d.val[0];
     });
-    countExtent[0] = 0;
+    //countExtent[0] = 0;
     var opacityScale = d3.scale.linear()
-        .domain(countExtent).range([0.1, 1]);
+        .domain(countExtent).range([0, 1]);
 
     rectSel.call(setCellStyle);
 
