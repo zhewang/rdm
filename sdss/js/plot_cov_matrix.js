@@ -247,7 +247,10 @@ function covMat(rectSel, data, args) {
             }
         })
         .attr('opacity', function(d){
-            return opacityScale(d.val.count);
+            if(d.val.cov_matrix === null) {
+                return 0;
+            }
+            //return opacityScale(d.val.count);
         })
         .on('click', function(d){ console.log(d); });
     }
