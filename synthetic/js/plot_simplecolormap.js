@@ -84,17 +84,6 @@ function plotHeatmap(diveLevel, data,
         .attr('viewBox', '0 0 '+viewBoxWidth+' '+viewBoxHeight)
         .attr('id', 'plot');
 
-    svgSel.append("rect")
-    .attr("x", 0)
-    .attr("y", 0)
-    .attr("height", 500)
-    .attr("width", 500)
-    .style("stroke", '#bdbdbd')
-    .style("fill", "none")
-    .style("stroke-width", 1);
-
-    var xScale = d3.scale.linear().domain(xExtent).range([0, contentWidth]);
-    var yScale = d3.scale.linear().domain(yExtent).range([contentHeight, 0]);
 
 
     svgSel.append("g")
@@ -110,6 +99,19 @@ function plotHeatmap(diveLevel, data,
         .attr("width", ~~gridXSize+1)
         .attr("height", ~~gridYSize+1)
         .call(cellStyleFunc, data);
+
+    // add border
+    svgSel.append("rect")
+    .attr("x", 0)
+    .attr("y", 0)
+    .attr("height", 500)
+    .attr("width", 500)
+    .style("stroke", '#bdbdbd')
+    .style("fill", "none")
+    .style("stroke-width", 1);
+
+    var xScale = d3.scale.linear().domain(xExtent).range([0, contentWidth]);
+    var yScale = d3.scale.linear().domain(yExtent).range([contentHeight, 0]);
 
     // Draw the axis
     //var xAxis = d3.svg.axis().scale(xScale).ticks(10);
@@ -160,9 +162,12 @@ function CovMatColorMap(rectSel, data) {
             var r = Math.abs(Math.floor(d.val.cov_matrix[0][0]/10*200));
             var g = Math.abs(Math.floor(d.val.cov_matrix[1][1]/10*200));
             var b = Math.abs(Math.floor(d.val.cov_matrix[2][2]/10*200));
-            return 'rgb({0},{1},{2})'.format(r,g,b);
+            var a = opacityScale(d.val.count);
+            return 'rgb({0},{1},{2})'.format(~~(255*(1-a)+a*r),
+                                             ~~(255*(1-a)+a*g),
+                                             ~~(255*(1-a)+a*b));
         })
-        .attr('opacity', function(d){return opacityScale(d.val.count)})
+        //.attr('opacity', function(d){return opacityScale(d.val.count)})
         .on('click', function(d){ console.log(d); });
     }
 }
