@@ -1,5 +1,5 @@
-var nanocube_server_url = 'http://hdc.cs.arizona.edu/nanocube/10010/';
-//var nanocube_server_url = 'http://localhost:29513/';
+//var nanocube_server_url = 'http://hdc.cs.arizona.edu/nanocube/10010/';
+var nanocube_server_url = 'http://localhost:29512/';
 var quadtree_level = 15;
 var variable_schema = ['count', '0', '1', '2', '0*0', '0*1', '0*2', '1*1', '1*2', '2*2'];
 
@@ -158,7 +158,7 @@ function CovMatColorMap(rectSel, data) {
             var b = Math.abs(Math.floor(d.val.cov_matrix[2][2]/10*200));
             return 'rgb({0},{1},{2})'.format(r,g,b);
         })
-        //.attr('opacity', function(d){return opacityScale(d.val.count)})
+        .attr('opacity', function(d){return opacityScale(d.val.count)})
         .on('click', function(d){ console.log(d); });
     }
 }

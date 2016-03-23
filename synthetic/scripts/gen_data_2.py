@@ -40,7 +40,7 @@ def getXY():
     means = {1:[7,2], 2:[2,7], 3:[2,2]}
     r = random.randint(1,3)
     while (0 < key[0] < 10) is False or (0 < key[1] < 10) is False:
-        key = np.random.multivariate_normal(means[r], np.diag([5,5])).tolist()
+        key = np.random.multivariate_normal(means[r], np.diag([3,3])).tolist()
     return key
 
 
