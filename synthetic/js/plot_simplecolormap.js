@@ -1,5 +1,5 @@
-//var nanocube_server_url = 'http://hdc.cs.arizona.edu/nanocube/10010/';
-var nanocube_server_url = 'http://localhost:29512/';
+var nanocube_server_url = 'http://hdc.cs.arizona.edu/nanocube/10011/';
+//var nanocube_server_url = 'http://localhost:29512/';
 var quadtree_level = 15;
 var variable_schema = ['count', '0', '1', '2', '0*0', '0*1', '0*2', '1*1', '1*2', '2*2'];
 
@@ -65,29 +65,33 @@ function plotHeatmap(diveLevel, data,
     var plotWidth = 500;
     var plotHeight = 500;
 
-    var margin = { top: 10, right: 30, bottom: 30, left: 30 };
+    var margin = { top: 0, right: 0, bottom: 0, left: 0 };
     var viewBoxWidth = 500;
     var viewBoxHeight = 500;
 
     var contentWidth = viewBoxWidth-margin.left-margin.right;
     var contentHeight = viewBoxHeight-margin.top-margin.bottom;
 
-    var gridXSize = Math.floor(contentWidth/Math.pow(2,diveLevel)+0.5);
-    var gridYSize = Math.floor(contentHeight/Math.pow(2,diveLevel)+0.5);
-
-    gridXSize = Math.min(gridXSize, gridYSize);
-    gridYSize = gridXSize;
-
-    contentWidth = gridXSize*Math.pow(2,diveLevel);
-    contentHeight = gridYSize*Math.pow(2,diveLevel);
+    var gridXSize = contentWidth*1.0/Math.pow(2,diveLevel);
+    var gridYSize = contentHeight*1.0/Math.pow(2,diveLevel);
 
     // plot heatmap
     var svgSel = d3.select("#heatmap")
         .append("svg")
+        .style('padding', '10px')
         .attr("width", plotWidth)
         .attr("height", plotHeight)
         .attr('viewBox', '0 0 '+viewBoxWidth+' '+viewBoxHeight)
         .attr('id', 'plot');
+
+    svgSel.append("rect")
+    .attr("x", 0)
+    .attr("y", 0)
+    .attr("height", 500)
+    .attr("width", 500)
+    .style("stroke", '#bdbdbd')
+    .style("fill", "none")
+    .style("stroke-width", 1);
 
     var xScale = d3.scale.linear().domain(xExtent).range([0, contentWidth]);
     var yScale = d3.scale.linear().domain(yExtent).range([contentHeight, 0]);
@@ -103,40 +107,40 @@ function plotHeatmap(diveLevel, data,
         .attr("y", function(d) {
             return contentHeight-(d.y+1)*gridYSize;
         })
-        .attr("width", gridXSize)
-        .attr("height", gridYSize)
+        .attr("width", ~~gridXSize+1)
+        .attr("height", ~~gridYSize+1)
         .call(cellStyleFunc, data);
 
     // Draw the axis
-    var xAxis = d3.svg.axis().scale(xScale).ticks(10);
-    var yAxis = d3.svg.axis().scale(yScale).ticks(10);
+    //var xAxis = d3.svg.axis().scale(xScale).ticks(10);
+    //var yAxis = d3.svg.axis().scale(yScale).ticks(10);
 
-    svgSel.append("g")
-    .attr("transform", "translate("+margin.left+", "+
-          (contentHeight+margin.top).toString()+")")
-    .call(xAxis);
+    //svgSel.append("g")
+    //.attr("transform", "translate("+margin.left+", "+
+          //(contentHeight+margin.top).toString()+")")
+    //.call(xAxis);
 
-    yAxis.orient("left");
-    svgSel.append("g")
-    .attr("transform", "translate("+margin.left+", "+margin.top+")")
-    .call(yAxis);
+    //yAxis.orient("left");
+    //svgSel.append("g")
+    //.attr("transform", "translate("+margin.left+", "+margin.top+")")
+    //.call(yAxis);
 
-    var setAxisStyle = function (sel) {
-        sel.selectAll('.domain')
-        .attr('stroke-width', 2)
-        .attr('stroke', 'black')
-        .attr('fill', 'none');
+    //var setAxisStyle = function (sel) {
+        //sel.selectAll('.domain')
+        //.attr('stroke-width', 2)
+        //.attr('stroke', 'black')
+        //.attr('fill', 'none');
 
-        sel.selectAll('.tick').selectAll('line')
-        .attr('stroke', 'black')
-        .attr('fill', 'none');
+        //sel.selectAll('.tick').selectAll('line')
+        //.attr('stroke', 'black')
+        //.attr('fill', 'none');
 
-        sel.selectAll('.tick').selectAll('text')
-        .attr('font-family', 'sans-serif')
-        .attr('font-size', 10);
-    };
+        //sel.selectAll('.tick').selectAll('text')
+        //.attr('font-family', 'sans-serif')
+        //.attr('font-size', 10);
+    //};
 
-    svgSel.call(setAxisStyle);
+    //svgSel.call(setAxisStyle);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
