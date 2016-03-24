@@ -18,7 +18,7 @@ def sanityCheck(row):
         if isfloat(row[i]) is False:
             legal = False
             return legal
-        elif row[i] < 0:
+        elif float(row[i]) < 0 or float(row[i]) > 100:
             legal = False
             return legal
 
