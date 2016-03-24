@@ -30,19 +30,23 @@ def noNull(row):
 def header():
     header = "name: sdss_dr7_stars\n"+ \
              "encoding: binary\n"+ \
-             "field: location nc_dim_quadtree_{0}\n"+ \
-             "field: SPECTYPEHAMMER nc_dim_cat_1"+ \
-             "valname: SPECTYPEHAMMER 0 AA"+ \
-             "field: SPECTYPESUBCLASS nc_dim_cat_1"+ \
-             "valname: SPECTYPESUBCLASS 0 BA"+ \
+             "field: location nc_dim_quadtree_{0}\n" + \
              "metadata: tbin 2016-01-01_00:00:00_3600s\n"+ \
-             "field: time nc_dim_time_2\n"
+             "field: SPECTYPEHAMMER nc_dim_cat_1\n"
+
     header = header.format(LEVEL)
+
+    for key, value in MapSPECTYPEHAMMER.items():
+        header += "valname: SPECTYPEHAMMER {0} {1}\n".format(value, key)
+
+
+    header += "field: time nc_dim_time_2\n"
 
     # This includes the count dimension, not includes time dimension
     for i in range(count):
         header = header + 'field: dim' + str(i) + ' nc_var_float_8' + '\n'
     sys.stdout.write(header+'\n')
+    sys.stdout.flush()
 
 
 def body(filepath):
@@ -97,11 +101,11 @@ def body(filepath):
                     sys.exit(0)
 
             type1 = MapSPECTYPEHAMMER[row[19]]
-            type2 = MapSPECTYPESUBCLASS[row[20]]
-            print(type1, type2)
+            # type2 = MapSPECTYPESUBCLASS[row[20]]
+            # print(type1, type2)
 
             # Dump
-            pack_str = '<iiBBH' + 'd'*count
+            pack_str = '<iiBH' + 'd'*count
 
             resolution = 2**LEVEL
             xMin = g_rExtent[0]
@@ -111,7 +115,7 @@ def body(filepath):
 
             xTile = int(resolution*((key[0]*1.0-xMin)/xRange))
             yTile = int(resolution*((key[1]*1.0-yMin)/yRange))
-            binStr = struct.pack(pack_str,xTile,yTile,type1,type2,0,*var)
+            binStr = struct.pack(pack_str,xTile,yTile,type1,0,*var)
             sys.stdout.buffer.write(binStr)
 
     with open(filepath+'.stat', 'w') as f:
