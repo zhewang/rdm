@@ -16,16 +16,27 @@ def isfloat(value):
     except ValueError:
         return False
 
-def noNull(row):
-    legal = True
+def sanityCheck(row):
     for i in range(4, 19):
         if isfloat(row[i]) is False:
-            legal = False
-            return legal
-        elif float(row[i]) < 0 or float(row[i]) > 100:
-            legal = False
-            return legal
-    return legal
+            return False 
+
+    u = float(row[4])-float(row[9])
+    g = float(row[5])-float(row[10])
+    r = float(row[6])-float(row[11])
+    i = float(row[7])-float(row[12])
+    z = float(row[8])-float(row[13])
+
+    if u-g < u_gExtent[0] or u-g > u_gExtent[1]:
+        return False
+    if g-r < g_rExtent[0] or g-r > g_rExtent[1]:
+        return False
+    if r-i < r_iExtent[0] or r-i > r_iExtent[1]:
+        return False
+    if i-z < i_zExtent[0] or i-z > i_zExtent[1]:
+        return False
+
+    return True
 
 def header():
     header = "name: sdss_dr7_stars\n"+ \
@@ -58,7 +69,7 @@ def body(filepath):
     rowCounts = f[1].data.shape[0]
     for i in range(rowCounts):
         row = f[1].data[i]
-        if noNull(row) is False:
+        if sanityCheck(row) is False:
             filteredCount += 1
         else:
             legalCount += 1
@@ -67,7 +78,9 @@ def body(filepath):
             r = float(row[6])-float(row[11])
             i = float(row[7])-float(row[12])
             z = float(row[8])-float(row[13])
-            key = [g-r, i-z]
+            # key = [g-r, i-z]
+            key = [i-r, i-g]
+            # key = [float(row[2]), float(row[3])] # ra, dec
             v = []
             v.append(u)
             v.append(g)
@@ -142,8 +155,14 @@ if __name__ == '__main__':
     # rExtent = [10.0,31.0]
     # iExtent = [9.0,31.0]
     # zExtent = [8.0,29.0]
-    g_rExtent = [-7.0,16.0]
-    i_zExtent = [-10.0,13.0]
+    # g_rExtent = [-7.0,16.0]
+    # i_zExtent = [-10.0,13.0]
+
+    # Extent from Gautham
+    u_gExtent = [0.95, 2.75]
+    g_rExtent = [-0.01, 1.78]
+    r_iExtent = [-0.12, 2.74]
+    i_zExtent = [-0.13, 1.58]
 
     if args.s is False:
         header()
