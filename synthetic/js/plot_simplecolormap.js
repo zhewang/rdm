@@ -1,3 +1,5 @@
+var emlapack = require('./lib/emlapack.js');
+
 var nanocube_server_url = 'http://hdc.cs.arizona.edu/nanocube/10011/';
 //var nanocube_server_url = 'http://localhost:29512/';
 var quadtree_level = 15;
@@ -282,3 +284,47 @@ function RepackWithPCA(original_data) {
             return results;
     }
 }
+
+lapack = {
+    dsyev: (function setupDsyev() {
+        var dsyev = emlapack.cwrap('dsyev_', null, ['number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number']);
+        
+        var pjobz    = emlapack._malloc(1);
+        var puplo    = emlapack._malloc(1);
+        var pn       = emlapack._malloc(4);
+        var plda     = emlapack._malloc(4);
+        var plwork   = emlapack._malloc(4);
+        var pinfo    = emlapack._malloc(4);
+        var pworkopt = emlapack._malloc(4);
+
+        return function(jobz, uplo, aIn) {
+            var n = ~~Math.sqrt(aIn.length);
+            emlapack.setValue(pjobz,   jobz.charCodeAt(0), 'i8');
+            emlapack.setValue(puplo,   uplo.charCodeAt(0), 'i8');
+            emlapack.setValue(pn,      n, 'i32');
+            emlapack.setValue(plda,    n, 'i32');
+            emlapack.setValue(plwork, -1, 'i32');
+            var pw = emlapack._malloc(n * 8);
+            var pa = emlapack._malloc(n * n * 8);
+            var a = new Float64Array(emlapack.HEAPF64.buffer, pa, n * n);
+            var w = new Float64Array(emlapack.HEAPF64.buffer, pw, n);
+            a.set(aIn);
+            dsyev(pjobz, puplo, pn, pa, plda, pw, pworkopt, plwork, pinfo);
+            var workopt = emlapack.getValue(pworkopt, 'double'),
+                pwork   = emlapack._malloc(workopt * 8);
+            emlapack.setValue(plwork, workopt, 'i32');
+            dsyev(pjobz, puplo, pn, pa, plda, pw, pwork, plwork, pinfo);
+
+            var result = {
+                vec: new Float64Array(a),
+                val: new Float64Array(w),
+                info: emlapack.getValue(pinfo, 'i32')
+            };
+
+            emlapack._free(pwork);
+            emlapack._free(pa);
+            emlapack._free(pw);
+            return result;
+        };
+    })()
+};
