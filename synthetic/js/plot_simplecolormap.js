@@ -1,7 +1,7 @@
 var emlapack = require('./lib/emlapack.js');
 
-var nanocube_server_url = 'http://hdc.cs.arizona.edu/nanocube/10011/';
-//var nanocube_server_url = 'http://localhost:29512/';
+//var nanocube_server_url = 'http://hdc.cs.arizona.edu/nanocube/10011/';
+var nanocube_server_url = 'http://localhost:29512/';
 var quadtree_level = 15;
 var variable_schema = ['count', '0', '1', '2', '0*0', '0*1', '0*2', '1*1', '1*2', '2*2'];
 
@@ -58,7 +58,10 @@ function plotHeatmap(diveLevel, data,
                      dataTransformFunc=function(d){return d;} // Optional. Never change the original data.
                     )
 {
+    var start = new Date().getTime();
     data = dataTransformFunc(data);
+    var end = new Date().getTime();
+    console.log("PCA Calculateion Time: "+(end-start)+"ms");
     data = data.root.children;
 
     var xExtent = [0,10];
